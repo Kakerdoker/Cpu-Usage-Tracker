@@ -10,4 +10,4 @@ main.o: src/main.c
 	$(CC) $(CFLAGS) $(WALL) src/main.c
 
 clean:
-	rm $(OBJECTS) program.out
+	rm $(OBJECTS) output
