@@ -7,14 +7,13 @@
 
 void initialize(){
     initializeGlobalVariables();
-    initializePrinterVariables();
-    initializeMutexesAndSemaphores();
-
+    initializeMutexes();
     allocateBufferMemory();
+    createThreads();
 }
 
 void destroy(){
-    destroyMutexesAndSemaphores();
+    destroyMutexes();
     collectBufferGarbage();
 }
 
@@ -22,10 +21,10 @@ int main(){
 
     initialize();
 
-    createThreads();
+    runThreads();
 
     destroy();
-
+    
 }
 
 //todo: what next: write tests

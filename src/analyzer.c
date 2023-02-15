@@ -26,6 +26,7 @@ float calculateCpuUsage(int index){
     long idleDiff = currIdle - prevIdle;
 
     float CpuPercantage = 0;
+    //Make sure not to divide by zero;
     if(totalDiff != 0){
         CpuPercantage = ((float)(totalDiff-idleDiff)/(float)totalDiff)*100;
     }
@@ -36,23 +37,20 @@ float calculateCpuUsage(int index){
 void addCpuUsageToBuffer(){
     //Repeat for every core
     for(int core = 0 ; core < cpuCoreAmount; core++){
-        cpuUsageBuffer[cpuUsageBufferIndex][core] = calculateCpuUsage(core);
+        cpuUsageBuffer[core] = calculateCpuUsage(core);
     }
-    cpuUsageBufferIndex++;
 }
 
 void* analyzeCpuInfo(){
     while(1){
-        usleep(10000);//Wait 10 milliseconds
+        sleep(1);
         mtx_lock(&cpuInfoMutex); //Lock the cpu information buffer for reader.c
 
-        sem_wait(&semUsageEmpty); //Decrement semaphore for printer.c
         mtx_lock(&cpuUsageMutex); //Lock cpu usage buffer for printer.c
         
         addCpuUsageToBuffer();
 
         mtx_unlock(&cpuUsageMutex); //Unlock cpu usage buffer
-        sem_post(&semUsageFull); //Unlock semaphore and increment it
         
         mtx_unlock(&cpuInfoMutex);//Unlock cpu information buffer
     }
