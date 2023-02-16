@@ -27,7 +27,7 @@ int main(){
     
 }
 
-//todo: what next: write tests
+//todo: what next: fix warnings, get rid of the cpu sum, sort files into different folders
 
 
 

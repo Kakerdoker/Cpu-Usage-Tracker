@@ -30,7 +30,7 @@ float calculateCpuUsage(int index){
     if(totalDiff != 0){
         CpuPercantage = ((float)(totalDiff-idleDiff)/(float)totalDiff)*100;
     }
-    
+
     return CpuPercantage;
 }
 
@@ -47,7 +47,7 @@ void* analyzeCpuInfo(){
         mtx_lock(&cpuInfoMutex); //Lock the cpu information buffer for reader.c
 
         mtx_lock(&cpuUsageMutex); //Lock cpu usage buffer for printer.c
-        
+
         addCpuUsageToBuffer();
 
         mtx_unlock(&cpuUsageMutex); //Unlock cpu usage buffer

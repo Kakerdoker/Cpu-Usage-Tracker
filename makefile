@@ -1,10 +1,20 @@
 CC?=gcc
 CFLAGS=-c
-WALL=
-OBJECTS=main.o analyzer.o buffers.o global.o printer.o reader.o threads.o
+WALL=-Wall
+OBJECTS=analyzer.o buffers.o global.o printer.o reader.o threads.o
 
-output: $(OBJECTS)
-	$(CC) $(OBJECTS) -o output
+    #######################
+
+output: $(OBJECTS) main.o
+	$(CC) $(OBJECTS) main.o -o output
+
+test: $(OBJECTS) tests.o
+	$(CC) $(OBJECTS) tests.o -o test
+
+    #######################
+
+tests.o: src/main.c
+	$(CC) $(CFLAGS) $(WALL) tests/tests.c
 
 main.o: src/main.c
 	$(CC) $(CFLAGS) $(WALL) src/main.c
@@ -27,5 +37,7 @@ reader.o: src/reader.c
 threads.o: src/threads.c
 	$(CC) $(CFLAGS) $(WALL) src/threads.c
 
+    #######################
+
 clean:
-	rm $(OBJECTS) output
+	rm $(OBJECTS) tests.o main.o output test

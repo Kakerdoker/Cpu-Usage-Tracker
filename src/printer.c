@@ -6,15 +6,19 @@
 #include "buffers.h"
 
 
-void printCpuUsageAverages(){
-    char percantageBar[10];
+void makePercentageBar(char* percentageBar, int core){
+    int simplifiedPercent = (int)cpuUsageBuffer[core]/10;
+    for(int i = 0; i < 9; i++){
+        percentageBar[i] = i < simplifiedPercent ? '#' : '-';;
+    } 
+}
 
-    for(int i = 0; i < cpuCoreAmount; i++){
-        int simplifiedPercent = (int)cpuUsageBuffer[i]/10;
-        for(int j = 0; j < 10; j++){
-            percantageBar[j] = j < simplifiedPercent ? '#' : '-';
-        }
-        printf("CPU%i - [%s] - %.1f%%\n",i ,percantageBar, cpuUsageBuffer[i]);
+void printCpuUsageAverages(){
+    char percentageBar[9];
+
+    for(int core = 0; core < cpuCoreAmount; core++){
+        makePercentageBar(&percentageBar, core);
+        printf("CPU%i - [%s] - %.1f%%\n",core ,percentageBar, cpuUsageBuffer[core]);
     }
 }
 
