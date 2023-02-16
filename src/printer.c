@@ -6,24 +6,24 @@
 #include "../inc/buffers.h"
 
 
-void makePercentageBar(char* percentageBar, int core){
+char percentageBar[9];
+
+char* makePercentageBar(int core){
     int simplifiedPercent = (int)cpuUsageBuffer[core]/10;
     for(int i = 0; i < 9; i++){
         percentageBar[i] = i < simplifiedPercent ? '#' : '-';;
     } 
+    return percentageBar;
 }
 
 void printCpuUsageAverages(){
-    char percentageBar[9];
-
     for(int core = 0; core < cpuCoreAmount; core++){
-        makePercentageBar(&percentageBar, core);
-        printf("CPU%i - [%s] - %.1f%%\n",core+1 ,percentageBar, cpuUsageBuffer[core]);
+        printf("CPU%i - [%s] - %.1f%%\n",core+1 ,makePercentageBar(core), cpuUsageBuffer[core]);
     }
 }
 
 //Takes the average from the entire usage buffer every second and then fully clears it and prints the averages.
-void* printCpuUsagePercantages(){
+int printCpuUsagePercantages(){
     while(1){
         sleep(1);
         system("clear");
@@ -35,5 +35,5 @@ void* printCpuUsagePercantages(){
         mtx_unlock(&cpuUsageMutex);//Unlock cpu usage buffer
 
     }
-    return NULL;
+    return 0;
 }

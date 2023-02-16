@@ -1,7 +1,7 @@
 #ifndef READER_H
 #define READER_H
 
-void* getProcStatInfo();
+int getProcStatInfo();
 void openStatFile(char*);
 void readStatFileAndPutIntoBuffer();
 void copyCpuInfoBuffer();

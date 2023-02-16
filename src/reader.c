@@ -43,7 +43,7 @@ void readStatFileAndPutIntoBuffer(){
     fclose(statFile);
 }
 
-void* getProcStatInfo(){
+int getProcStatInfo(){
     while(1){
         sleep(1); //Read proc/stat once every second so the calculated cpu usage will be an average over that one second.
         mtx_lock(&cpuInfoMutex);//Lock the cpu information buffer for analyzeCpuInfo()
@@ -54,5 +54,5 @@ void* getProcStatInfo(){
 
         mtx_unlock(&cpuInfoMutex);//Unlock the cpu information buffer
     }
-    return NULL;
+    return 0;
 }

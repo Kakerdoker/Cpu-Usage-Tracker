@@ -2,10 +2,10 @@
 #define PRINTER_H
 
 //Used normally
-void* printCpuUsagePercantages();
+int printCpuUsagePercantages();
 
 //Used for tests
-void makePercentageBar(char*, int);
+char* makePercentageBar(int);
 
 
 #endif

@@ -41,7 +41,7 @@ void addCpuUsageToBuffer(){
     }
 }
 
-void* analyzeCpuInfo(){
+int analyzeCpuInfo(){
     while(1){
         sleep(1);
         mtx_lock(&cpuInfoMutex); //Lock the cpu information buffer for reader.c
@@ -54,5 +54,5 @@ void* analyzeCpuInfo(){
         
         mtx_unlock(&cpuInfoMutex);//Unlock cpu information buffer
     }
-    return NULL;
+    return 0;
 }

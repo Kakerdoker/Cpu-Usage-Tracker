@@ -1,7 +1,7 @@
 #ifndef ANALYZER_H
 #define ANALYZER_H
 
-void* analyzeCpuInfo();
+int analyzeCpuInfo();
 void addCpuUsageToBuffer();
 
 #endif

@@ -27,7 +27,7 @@ int main(){
     
 }
 
-//todo: what next: fix warnings, sort files into different folders
+//todo: what next: implementacja watchdog
 
 
 

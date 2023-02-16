@@ -62,12 +62,13 @@ void TEST_CalculatingCpuUsage(){
 void TEST_percentageBarAtEdge(char* bar, int num){
     char percentageBar[9];
 
+    //Create a bar and compare it with bar defined by bar argument.
     cpuUsageBuffer[0] = num;
-    makePercentageBar(&percentageBar, 0);
+    strcpy(percentageBar, makePercentageBar(0));
     assert(strcmp(percentageBar, bar) == 0);
 
     cpuUsageBuffer[0] = 0.99+num;
-    makePercentageBar(&percentageBar, 0);
+    strcpy(percentageBar, makePercentageBar(0));
     assert(strcmp(percentageBar, bar) == 0);
 }
 
@@ -88,13 +89,23 @@ void TEST_everyPercentageBarEdge(){
 //Test if what's going to be displayed using printer is done so correctly.
 void TEST_percentagePrints(){
     for(int core = 0; core < cpuCoreAmount; core++){
+        //Generate cpu usage bar using buffer values.
         char percentageBar[9];
-        makePercentageBar(&percentageBar, core);
-        char* one;
-        asprintf(&one, "CPU%i - [######---] - 66.7%%\n",core+1);
-        char* two;
-        asprintf(&two, "CPU%i - [%s] - %.1f%%\n",core+1 ,percentageBar, cpuUsageBuffer[core]);
-        assert(strcmp(one, two) == 0 && "ERROR comparing percentage bars!");
+        strcpy(percentageBar, makePercentageBar(core));
+
+        //Create a a string with 66.7% cpu usage.
+        char* correctString = malloc(sizeof(char)*64);
+        sprintf(correctString, "CPU%i - [######---] - 66.7%%\n",core+1);
+
+        //Create cpu usage string using buffer values.
+        char* testedString = malloc(sizeof(char)*64);
+        sprintf(testedString, "CPU%i - [%s] - %.1f%%\n",core+1 ,percentageBar, cpuUsageBuffer[core]);
+
+        //Compare them
+        assert(strcmp(correctString, testedString) == 0 && "ERROR comparing percentage bars!");
+
+        free(correctString);
+        free(testedString);
     }
 }
 
@@ -140,7 +151,7 @@ void TEST_analyzerMethods(){
 }
 
 void TEST_printerMethods(){
-    //Make sure printer prints out everything correctly.
+    //Make sure printer prints out everything correctly. Since TEST_everyPercentageBarEdge() changes cpuUsageBuffer[0] and TEST_percentagePrints() uses it, make sure TEST_percentagePrints() is always tested first.
     TEST_percentagePrints();
     TEST_everyPercentageBarEdge(); 
 }
