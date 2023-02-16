@@ -1,8 +1,8 @@
 #include <threads.h>
 
-#include "reader.h"
-#include "analyzer.h"
-#include "printer.h"
+#include "../inc/reader.h"
+#include "../inc/analyzer.h"
+#include "../inc/printer.h"
 
 thrd_t readFileThread, analyzeThread, printThread;
 

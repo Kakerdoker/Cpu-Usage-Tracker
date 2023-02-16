@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "global.h"
-#include "buffers.h"
-#include "threads.h"
+#include "../inc/global.h"
+#include "../inc/buffers.h"
+#include "../inc/threads.h"
 
 void initialize(){
     initializeGlobalVariables();
@@ -27,7 +27,7 @@ int main(){
     
 }
 
-//todo: what next: fix warnings, get rid of the cpu sum, sort files into different folders
+//todo: what next: fix warnings, sort files into different folders
 
 
 

@@ -1,43 +1,16 @@
 CC?=gcc
 CFLAGS=-c
 WALL=-Wall
-OBJECTS=analyzer.o buffers.o global.o printer.o reader.o threads.o
+OBJECTS=obj/analyzer.o obj/buffers.o obj/global.o obj/printer.o obj/reader.o obj/threads.o
 
-    #######################
+output: $(OBJECTS) obj/main.o
+	$(CC) $(OBJECTS) obj/main.o -o output
 
-output: $(OBJECTS) main.o
-	$(CC) $(OBJECTS) main.o -o output
+test: $(OBJECTS) obj/tests.o
+	$(CC) $(OBJECTS) obj/tests.o -o test
 
-test: $(OBJECTS) tests.o
-	$(CC) $(OBJECTS) tests.o -o test
-
-    #######################
-
-tests.o: src/main.c
-	$(CC) $(CFLAGS) $(WALL) tests/tests.c
-
-main.o: src/main.c
-	$(CC) $(CFLAGS) $(WALL) src/main.c
-
-analyzer.o: src/analyzer.c
-	$(CC) $(CFLAGS) $(WALL) src/analyzer.c
-
-buffers.o: src/buffers.c
-	$(CC) $(CFLAGS) $(WALL) src/buffers.c
-
-global.o: src/global.c
-	$(CC) $(CFLAGS) $(WALL) src/global.c
-
-printer.o: src/printer.c
-	$(CC) $(CFLAGS) $(WALL) src/printer.c
-
-reader.o: src/reader.c
-	$(CC) $(CFLAGS) $(WALL) src/reader.c
-
-threads.o: src/threads.c
-	$(CC) $(CFLAGS) $(WALL) src/threads.c
-
-    #######################
+obj/%.o: src/%.c
+	$(CC) $(CFLAGS) $(WALL) -o $@ $<
 
 clean:
-	rm $(OBJECTS) tests.o main.o output test
+	rm $(OBJECTS) obj/tests.o obj/main.o output test

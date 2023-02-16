@@ -4,11 +4,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "../src/buffers.h"
-#include "../src/global.h"
-#include "../src/reader.h"
-#include "../src/analyzer.h"
-#include "../src/printer.h"
+#include "../inc/buffers.h"
+#include "../inc/global.h"
+#include "../inc/reader.h"
+#include "../inc/analyzer.h"
+#include "../inc/printer.h"
 
 
 //Test if variables were corretly read and put into the buffer.

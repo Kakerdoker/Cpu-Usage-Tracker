@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include <threads.h>
 #include <semaphore.h>
-#include "global.h"
+
+#include "../inc/global.h"
 
 struct CpuInfo{
     unsigned long user, nice, system, idle, iowait, irq, softirq, steal;

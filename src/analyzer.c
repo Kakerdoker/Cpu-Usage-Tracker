@@ -1,7 +1,7 @@
 #include <unistd.h>
 
-#include "global.h"
-#include "buffers.h"
+#include "../inc/global.h"
+#include "../inc/buffers.h"
 
 long unsigned calculateIdle(struct CpuInfo* cpuInfo, int index){
     return cpuInfo[index].idle + cpuInfo[index].iowait;

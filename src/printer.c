@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "global.h"
-#include "buffers.h"
+#include "../inc/global.h"
+#include "../inc/buffers.h"
 
 
 void makePercentageBar(char* percentageBar, int core){
