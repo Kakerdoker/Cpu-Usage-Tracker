@@ -13,18 +13,7 @@
 
 //Test if variables were corretly read and put into the buffer.
 void TEST_VariablesReadFromFile(int number){
-    assert(currentCpuInfoBuffer[0].user == number*cpuCoreAmount);
-    assert(currentCpuInfoBuffer[0].nice == number*cpuCoreAmount);
-    assert(currentCpuInfoBuffer[0].system == number*cpuCoreAmount);
-    assert(currentCpuInfoBuffer[0].idle == number*cpuCoreAmount);
-    assert(currentCpuInfoBuffer[0].iowait == number*cpuCoreAmount);
-    assert(currentCpuInfoBuffer[0].irq == 0);
-    assert(currentCpuInfoBuffer[0].softirq == number*cpuCoreAmount);
-    assert(currentCpuInfoBuffer[0].steal == 0);
-    assert(currentCpuInfoBuffer[0].guest == 0);
-    assert(currentCpuInfoBuffer[0].guest_nice == 0);
-
-    for(int core = 1; core < cpuCoreAmount; core++){
+    for(int core = 0; core < cpuCoreAmount; core++){
         assert(currentCpuInfoBuffer[core].user == number);
         assert(currentCpuInfoBuffer[core].nice == number);
         assert(currentCpuInfoBuffer[core].system == number);
@@ -33,8 +22,6 @@ void TEST_VariablesReadFromFile(int number){
         assert(currentCpuInfoBuffer[core].irq == 0);
         assert(currentCpuInfoBuffer[core].softirq == number);
         assert(currentCpuInfoBuffer[core].steal == 0);
-        assert(currentCpuInfoBuffer[core].guest == 0);
-        assert(currentCpuInfoBuffer[core].guest_nice == 0);
     }
 }
 
@@ -49,8 +36,6 @@ void TEST_CopyBeforeNewRead(){
         assert(currentCpuInfoBuffer[core].irq == previousCpuInfoBuffer[core].irq);
         assert(currentCpuInfoBuffer[core].softirq == previousCpuInfoBuffer[core].softirq);
         assert(currentCpuInfoBuffer[core].steal == previousCpuInfoBuffer[core].steal);
-        assert(currentCpuInfoBuffer[core].guest == previousCpuInfoBuffer[core].guest);
-        assert(currentCpuInfoBuffer[core].guest_nice == previousCpuInfoBuffer[core].guest_nice);
     }
 }
 
@@ -106,9 +91,9 @@ void TEST_percentagePrints(){
         char percentageBar[9];
         makePercentageBar(&percentageBar, core);
         char* one;
-        asprintf(&one, "CPU%i - [######---] - 66.7%%\n",core);
+        asprintf(&one, "CPU%i - [######---] - 66.7%%\n",core+1);
         char* two;
-        asprintf(&two, "CPU%i - [%s] - %.1f%%\n",core ,percentageBar, cpuUsageBuffer[core]);
+        asprintf(&two, "CPU%i - [%s] - %.1f%%\n",core+1 ,percentageBar, cpuUsageBuffer[core]);
         assert(strcmp(one, two) == 0 && "ERROR comparing percentage bars!");
     }
 }

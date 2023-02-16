@@ -4,7 +4,7 @@
 #include <threads.h>
 
 struct CpuInfo{
-    unsigned long user, nice, system, idle, iowait, irq, softirq, steal, guest, guest_nice;
+    unsigned long user, nice, system, idle, iowait, irq, softirq, steal;
 };
 
 extern mtx_t cpuInfoMutex, cpuUsageMutex;

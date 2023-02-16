@@ -19,11 +19,15 @@ void copyCpuInfoBuffer(){
 
 void readStatFileAndPutIntoBuffer(){
     int line = 0;
-    //Go through all 10 numbers seperated by space ignoring the first string for every cpu core + 1 and add it to the corresponding index in cpuInfo.
+    
+    //Skip first line
+    fscanf(statFile, "%*s %*i %*i %*i %*i %*i %*i %*i %*i %*i %*i");
+
+    //Go through all 10 numbers seperated by space ignoring the first cpu string and last guest & guest_nice variables. Do it for every cpu core and add it to the corresponding index in cpuInfo.
     while(line < cpuCoreAmount){
         fscanf(
             statFile,
-            "%*s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu",
+            "%*s %lu %lu %lu %lu %lu %lu %lu %lu %*i %*i",
             &currentCpuInfoBuffer[line].user,
             &currentCpuInfoBuffer[line].nice,
             &currentCpuInfoBuffer[line].system,
@@ -31,9 +35,7 @@ void readStatFileAndPutIntoBuffer(){
             &currentCpuInfoBuffer[line].iowait,
             &currentCpuInfoBuffer[line].irq,
             &currentCpuInfoBuffer[line].softirq,
-            &currentCpuInfoBuffer[line].steal,
-            &currentCpuInfoBuffer[line].guest,
-            &currentCpuInfoBuffer[line].guest_nice
+            &currentCpuInfoBuffer[line].steal
         );
         line++;
     }

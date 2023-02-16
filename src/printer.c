@@ -18,7 +18,7 @@ void printCpuUsageAverages(){
 
     for(int core = 0; core < cpuCoreAmount; core++){
         makePercentageBar(&percentageBar, core);
-        printf("CPU%i - [%s] - %.1f%%\n",core ,percentageBar, cpuUsageBuffer[core]);
+        printf("CPU%i - [%s] - %.1f%%\n",core+1 ,percentageBar, cpuUsageBuffer[core]);
     }
 }
 

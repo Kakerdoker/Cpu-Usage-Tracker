@@ -12,7 +12,7 @@ void setAmountOfCpuCores(){
         //todo: Add sending message to logger
         exit(1);
     }
-    cpuCoreAmount = sysconf(_SC_NPROCESSORS_ONLN) +1;
+    cpuCoreAmount = sysconf(_SC_NPROCESSORS_ONLN);
 }
 
 void initializeGlobalVariables(){
