@@ -30,16 +30,25 @@ int checkResponseLongerThan2Seconds(int thread){
     return timeSinceLastUpdate > 2 ? 1 : 0;
 }
 
+//Go through every thread and check if any of them took longer than 2 seconds to respond than return that thread.
 int checkAllThreadResponses(){
-    //Go through the last update of each thread
     for(int thread = 0; thread < THREAD_AMOUNT; thread++){
         if(checkResponseLongerThan2Seconds(thread)){
-            //todo: add message to logger
-            closeProgram(getMessageFromThread(thread));
-            return 1;
+            return thread;
         }
     }
-    return 0;
+    return -1;
+}
+
+/*
+    If stopEverything recieves a non -1 value, it means that some thread stopped responding.
+    (It would be way more readable if stopEverything was just inside checkAllThreadResponses() isntead, but it needs to be it's own function to make testing checkAllThreadResponses() easier.)
+*/
+void stopEverything(int thread){
+    if(thread != -1){
+        //todo: add message to logger
+        closeProgram(getMessageFromThread(thread));
+    }
 }
 
 int checkLastUpdate(){
@@ -47,7 +56,7 @@ int checkLastUpdate(){
         usleep(500000);//Check every half a second.
         mtx_lock(&watchdogUpdateMutex);
 
-        checkAllThreadResponses();
+        stopEverything(checkAllThreadResponses());
 
         mtx_unlock(&watchdogUpdateMutex);
         

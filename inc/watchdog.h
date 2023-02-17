@@ -2,6 +2,7 @@
 #define WATCHDOG_H
 
 //Used for testing
+char* getMessageFromThread(int);
 int checkResponseLongerThan2Seconds(int);
 int checkAllThreadResponses();
 

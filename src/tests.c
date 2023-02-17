@@ -9,6 +9,7 @@
 #include "../inc/reader.h"
 #include "../inc/analyzer.h"
 #include "../inc/printer.h"
+#include "../inc/watchdog.h"
 
 
 //Test if variables were corretly read and put into the buffer.
@@ -109,6 +110,32 @@ void TEST_percentagePrints(){
     }
 }
 
+void TEST_threadMessages(){
+    assert(strcmp(getMessageFromThread(0), "Reader thread stopped responding, closing program!") == 0 && "ERROR got incorrect message from reader thread!");
+    assert(strcmp(getMessageFromThread(1), "Analyzer thread stopped responding, closing program!") == 0 && "ERROR got incorrect message from analyzer thread !");
+    assert(strcmp(getMessageFromThread(2), "Printer thread stopped responding, closing program!") == 0 && "ERROR got incorrect message from printer thread!");
+    assert(strcmp(getMessageFromThread(999), "Unknown thread stopped responding, closing program!") == 0 && "ERROR got incorrect message from unknown thread!");    
+    assert(strcmp(getMessageFromThread(-999), "Unknown thread stopped responding, closing program!") == 0 && "ERROR got incorrect message from unknown thread!");    
+}
+
+//Checks if checkAllThreadResponses() returns appropriate value for every thread being responsive in the last 2 seconds.
+void TEST_twoSecondsResponse(){
+    for(int thread = 0; thread < THREAD_AMOUNT; thread++){
+        updateBuffer[thread] = time(NULL) - 2;
+    }
+    assert(checkAllThreadResponses() == -1 && "ERROR One of the threads being responsive returned an unresponsive value!");
+}
+
+//Tests if checkAllThreadResponses() returns appropriate value for every thread being unresponsive for 3 seconds.
+void TEST_threeSecondsResponse(){
+    //Since checkAllThreadResponses() checks threads from 0 to THREAD_AMOUNT and returns the first thread that doesn't respond,
+    //then the for loop below should check them in reverse order to make sure that every thread gets checked for not responding once, instead of the first thread getting checked THREAD_AMOUNT of times.
+    for(int thread = THREAD_AMOUNT-1; thread >= 0; thread--){
+        updateBuffer[thread] = time(NULL) - 3;
+        assert(checkAllThreadResponses() == thread && "ERROR One of the threads being unresponsive for three seconds returned a responsive value!");
+    }
+}
+
 void TEST_readerMethods(){
     
     //Fill out statFile with an example proc/stat file (with some gibberish added to make it a little bit harder for the program).
@@ -156,6 +183,12 @@ void TEST_printerMethods(){
     TEST_everyPercentageBarEdge(); 
 }
 
+void TEST_watchdogMethods(){
+    TEST_twoSecondsResponse();
+    TEST_threeSecondsResponse();
+    TEST_threadMessages();
+}
+
 int main(){
     cpuCoreAmount = 4;//Testing as if someone had 4 cores, adding more without changing statFile will not work.
 
@@ -164,6 +197,7 @@ int main(){
     TEST_readerMethods();
     TEST_analyzerMethods();
     TEST_printerMethods();
+    TEST_watchdogMethods();
 
     collectBufferGarbage();
 
