@@ -12,22 +12,15 @@ void initialize(){
     createThreads();
 }
 
-void destroy(){
-    destroyMutexes();
-    collectBufferGarbage();
-}
-
 int main(){
 
     initialize();
 
     runThreads();
-
-    destroy();
     
 }
 
-//todo: what next: implementacja watchdog
+//todo: what next: test watchdog
 
 
 

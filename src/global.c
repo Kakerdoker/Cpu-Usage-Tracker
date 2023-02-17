@@ -2,7 +2,7 @@
 #include <unistd.h>
 
 /*
-    global.c is used for storing and calculating variables used by multiple files
+    global.c is used for storing and calculating general variables used by multiple files
 */
 unsigned int cpuCoreAmount;
 

@@ -4,7 +4,8 @@
 
 #include "../inc/global.h"
 #include "../inc/buffers.h"
-
+#include "../inc/watchdog.h"
+#include "../inc/threads.h"
 
 char percentageBar[9];
 
@@ -24,7 +25,8 @@ void printCpuUsageAverages(){
 
 //Takes the average from the entire usage buffer every second and then fully clears it and prints the averages.
 int printCpuUsagePercantages(){
-    while(1){
+    while(threadsActive){
+        updateWatchdogBuffer(2);
         sleep(1);
         system("clear");
 
@@ -35,5 +37,5 @@ int printCpuUsagePercantages(){
         mtx_unlock(&cpuUsageMutex);//Unlock cpu usage buffer
 
     }
-    return 0;
+    thrd_exit(0);
 }

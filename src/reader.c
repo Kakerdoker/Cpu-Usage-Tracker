@@ -3,8 +3,16 @@
 
 #include "../inc/global.h"
 #include "../inc/buffers.h"
+#include "../inc/threads.h"
 
 FILE *statFile;
+
+void closeStatFile(){
+    if(statFile != NULL){
+        fclose(statFile);
+        statFile = NULL;
+    }
+}
 
 //Put it into a differen't function to make writing tests easier.
 void openStatFile(char* fileDir){
@@ -40,12 +48,14 @@ void readStatFileAndPutIntoBuffer(){
         );
         line++;
     }
-    fclose(statFile);
+    closeStatFile();
 }
 
 int getProcStatInfo(){
-    while(1){
+    while(threadsActive){
+        updateWatchdogBuffer(0);
         sleep(1); //Read proc/stat once every second so the calculated cpu usage will be an average over that one second.
+
         mtx_lock(&cpuInfoMutex);//Lock the cpu information buffer for analyzeCpuInfo()
 
         openStatFile("/proc/stat");
@@ -54,5 +64,5 @@ int getProcStatInfo(){
 
         mtx_unlock(&cpuInfoMutex);//Unlock the cpu information buffer
     }
-    return 0;
+    thrd_exit(0);
 }

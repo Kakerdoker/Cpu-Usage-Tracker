@@ -4,6 +4,7 @@
 //Used normally
 int printCpuUsagePercantages();
 
+
 //Used for tests
 char* makePercentageBar(int);
 

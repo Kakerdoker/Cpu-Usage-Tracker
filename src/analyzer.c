@@ -2,6 +2,7 @@
 
 #include "../inc/global.h"
 #include "../inc/buffers.h"
+#include "../inc/threads.h"
 
 long unsigned calculateIdle(struct CpuInfo* cpuInfo, int index){
     return cpuInfo[index].idle + cpuInfo[index].iowait;
@@ -43,6 +44,7 @@ void addCpuUsageToBuffer(){
 
 int analyzeCpuInfo(){
     while(1){
+        updateWatchdogBuffer(1);
         sleep(1);
         mtx_lock(&cpuInfoMutex); //Lock the cpu information buffer for reader.c
 
@@ -54,5 +56,5 @@ int analyzeCpuInfo(){
         
         mtx_unlock(&cpuInfoMutex);//Unlock cpu information buffer
     }
-    return 0;
+    thrd_exit(0);
 }
