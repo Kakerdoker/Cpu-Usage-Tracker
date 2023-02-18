@@ -4,10 +4,13 @@
 #include "../inc/global.h"
 #include "../inc/buffers.h"
 #include "../inc/threads.h"
+#include "../inc/logger.h"
 
 void initialize(){
     initializeGlobalVariables();
     initializeMutexes();
+    initializeSemaphores();
+    initializeLogger();
     allocateBufferMemory();
     createThreads();
 }

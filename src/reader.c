@@ -54,15 +54,15 @@ void readStatFileAndPutIntoBuffer(){
 int getProcStatInfo(){
     while(threadsActive){
         updateWatchdogBuffer(0);
-        sleep(1); //Read proc/stat once every second so the calculated cpu usage will be an average over that one second.
 
+        sleep(1); //Read proc/stat once every second so the calculated cpu usage will be an average over that one second.
         mtx_lock(&cpuInfoMutex);//Lock the cpu information buffer for analyzeCpuInfo()
 
         openStatFile("/proc/stat");
         copyCpuInfoBuffer();
         readStatFileAndPutIntoBuffer();
 
-        mtx_unlock(&cpuInfoMutex);//Unlock the cpu information buffer
+        mtx_unlock(&cpuInfoMutex);
     }
     thrd_exit(0);
 }

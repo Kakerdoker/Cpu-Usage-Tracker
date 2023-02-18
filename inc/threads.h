@@ -5,6 +5,7 @@ extern int threadsActive;
 
 void createThreads();
 void runThreads();
-void detachThreads();
+void detachThreadsExceptLogAndWatch();
+void detachLogger();
 
 #endif

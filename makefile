@@ -1,7 +1,7 @@
 CC?=gcc
 CFLAGS=-c
 WALL=-Wall
-OBJECTS=obj/analyzer.o obj/buffers.o obj/global.o obj/printer.o obj/reader.o obj/threads.o obj/watchdog.o obj/destroyer.o
+OBJECTS=obj/analyzer.o obj/buffers.o obj/global.o obj/printer.o obj/reader.o obj/threads.o obj/watchdog.o obj/destroyer.o obj/logger.o
 
 output: $(OBJECTS) obj/main.o
 	$(CC) $(OBJECTS) obj/main.o -o output
@@ -14,3 +14,4 @@ obj/%.o: src/%.c
 
 clean:
 	rm $(OBJECTS) obj/tests.o obj/main.o output test
+	rm -rf logs

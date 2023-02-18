@@ -120,20 +120,33 @@ void TEST_threadMessages(){
 
 //Checks if checkAllThreadResponses() returns appropriate value for every thread being responsive in the last 2 seconds.
 void TEST_twoSecondsResponse(){
+    sem_post(&messageBuffEmpty);//So logger doesn't get blocked
+
     for(int thread = 0; thread < THREAD_AMOUNT; thread++){
         updateBuffer[thread] = time(NULL) - 2;
     }
     assert(checkAllThreadResponses() == -1 && "ERROR One of the threads being responsive returned an unresponsive value!");
+    
+    sem_wait(&messageBuffEmpty);
 }
 
 //Tests if checkAllThreadResponses() returns appropriate value for every thread being unresponsive for 3 seconds.
 void TEST_threeSecondsResponse(){
+    sem_post(&messageBuffEmpty);//So logger doesn't get blocked
+
     //Since checkAllThreadResponses() checks threads from 0 to THREAD_AMOUNT and returns the first thread that doesn't respond,
     //then the for loop below should check them in reverse order to make sure that every thread gets checked for not responding once, instead of the first thread getting checked THREAD_AMOUNT of times.
     for(int thread = THREAD_AMOUNT-1; thread >= 0; thread--){
         updateBuffer[thread] = time(NULL) - 3;
         assert(checkAllThreadResponses() == thread && "ERROR One of the threads being unresponsive for three seconds returned a responsive value!");
     }
+    sem_wait(&messageBuffEmpty);
+}
+
+//Test to see if watchdog still checks for responsiveness even if semEmpty == 0, which means that logger is waiting for new messages to log.
+void TEST_loggerBlockForUnresponsivness(){
+    updateBuffer[THREAD_AMOUNT-1] = time(NULL) - 3;
+    assert(checkLoggerThread() == -1 && "Logger was waiting for message but watchdog still checked to see if it was responsive. Did you sem_post(&messageBuffEmpty) anywhere in the test without sen_wait after?");
 }
 
 void TEST_readerMethods(){
@@ -187,12 +200,14 @@ void TEST_watchdogMethods(){
     TEST_twoSecondsResponse();
     TEST_threeSecondsResponse();
     TEST_threadMessages();
+    TEST_loggerBlockForUnresponsivness();
 }
 
 int main(){
     cpuCoreAmount = 4;//Testing as if someone had 4 cores, adding more without changing statFile will not work.
 
     allocateBufferMemory();
+    initializeSemaphores();
 
     TEST_readerMethods();
     TEST_analyzerMethods();
@@ -200,12 +215,7 @@ int main(){
     TEST_watchdogMethods();
 
     collectBufferGarbage();
+    destroySemaphores();
 
     printf("\nTEST RAN SUCCESFULLY! YAY\n\n");
 }
-
-
-
-
-
-

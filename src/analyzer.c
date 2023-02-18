@@ -43,18 +43,19 @@ void addCpuUsageToBuffer(){
 }
 
 int analyzeCpuInfo(){
-    while(1){
+    while(threadsActive){
         updateWatchdogBuffer(1);
         sleep(1);
+
         mtx_lock(&cpuInfoMutex); //Lock the cpu information buffer for reader.c
 
         mtx_lock(&cpuUsageMutex); //Lock cpu usage buffer for printer.c
 
         addCpuUsageToBuffer();
 
-        mtx_unlock(&cpuUsageMutex); //Unlock cpu usage buffer
+        mtx_unlock(&cpuUsageMutex); 
         
-        mtx_unlock(&cpuInfoMutex);//Unlock cpu information buffer
+        mtx_unlock(&cpuInfoMutex);
     }
     thrd_exit(0);
 }

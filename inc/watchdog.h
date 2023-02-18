@@ -5,6 +5,7 @@
 char* getMessageFromThread(int);
 int checkResponseLongerThan2Seconds(int);
 int checkAllThreadResponses();
+int checkLoggerThread();
 
 //Used for other funcitons
 int checkLastUpdate();

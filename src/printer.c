@@ -23,10 +23,10 @@ void printCpuUsageAverages(){
     }
 }
 
-//Takes the average from the entire usage buffer every second and then fully clears it and prints the averages.
 int printCpuUsagePercantages(){
     while(threadsActive){
         updateWatchdogBuffer(2);
+
         sleep(1);
         system("clear");
 
@@ -34,7 +34,7 @@ int printCpuUsagePercantages(){
 
         printCpuUsageAverages();
 
-        mtx_unlock(&cpuUsageMutex);//Unlock cpu usage buffer
+        mtx_unlock(&cpuUsageMutex);
 
     }
     thrd_exit(0);
