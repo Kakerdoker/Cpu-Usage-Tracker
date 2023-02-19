@@ -1,4 +1,5 @@
 #include <threads.h>
+#include <stdio.h>
 
 #include "../inc/logger.h"
 #include "../inc/reader.h"
