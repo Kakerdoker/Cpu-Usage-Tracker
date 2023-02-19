@@ -23,7 +23,6 @@ int main(){
     
 }
 
-//todo: what next: test watchdog
 
 
 

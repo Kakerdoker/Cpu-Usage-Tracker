@@ -4,6 +4,7 @@
 #include "../inc/global.h"
 #include "../inc/buffers.h"
 #include "../inc/threads.h"
+#include "../inc/logger.h"
 
 FILE *statFile;
 
@@ -12,11 +13,13 @@ void closeStatFile(){
         fclose(statFile);
         statFile = NULL;
     }
+    else{
+        logMessage("Tried to open closed file. (reader.c)");
+    }
 }
 
 //Put it into a differen't function to make writing tests easier.
 void openStatFile(char* fileDir){
-    //todo: read up on fopen and what to do to make it safer.
     statFile = fopen(fileDir, "r");
 }
 

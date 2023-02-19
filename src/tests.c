@@ -235,8 +235,6 @@ void TEST_initializeLogger(){
     myAssert(sprintf(testedString, "%s %s",tempString1, tempString2) < 128, "testedString too big in TEST_initializeLogger()");
     fclose(loggerFile);
 
-    printf("%s",testedString);
-
     //Compare read string with what should be in logs.txt
     myAssert(strcmp("PROGRAM STARTED",testedString) == 0, "initializeLogger() didn't log the message PROGRAM STARTED");
 }
