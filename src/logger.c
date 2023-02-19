@@ -4,18 +4,29 @@
 #include <unistd.h>
 #include <time.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "../inc/buffers.h"
 #include "../inc/threads.h"
 
 struct stat st = {0};
-char logDir[16] = "logs/logs.txt";
+char logDir[32];
 FILE* logFile;
 time_t currentTime;
 
-void makeLogsFileIfDidntExist(){
-    if (stat("logs", &st) == -1) {
-        mkdir("logs", 0777);
+void logMessage(char* message){
+    sem_wait(&messageBuffFull);//Wait until messageBufferFull is not empty (until there are 15 messages waiting to be logged)
+    mtx_lock(&messageMutex);//Lock messageBuffer for waitForNewMessagesToLog()
+    
+    writeMessage(message);
+
+    mtx_unlock(&messageMutex);
+    sem_post(&messageBuffEmpty);//Increment the messageBufferEmpty so it knows there is one more message to log
+}
+
+void makeLogsFileIfDidntExist(char* dir){
+    if (stat(dir, &st) == -1) {
+        mkdir(dir, 0777);
     }
 }
 
@@ -27,8 +38,13 @@ void logProgramStart(){
     fclose(logFile);
 }
 
-void initializeLogger(){
-    makeLogsFileIfDidntExist();
+void initializeLogger(char* dir, char* file){
+    if(sprintf(logDir, "%s/%s", dir, file) >= 32){
+        logMessage("initializeLogger: logDir exceeds 32 characters (logger.c)");
+        exit(1);//todo: better exit
+    }
+
+    makeLogsFileIfDidntExist(dir);
     logProgramStart();
 }
 
@@ -65,14 +81,4 @@ int waitForNewMessagesToLog(){
         sem_post(&messageBuffFull);//Increment the messageBufferFull so it knows there is one less message in the buffer.
     }
     thrd_exit(0);
-}
-
-void logMessage(char* message){
-    sem_wait(&messageBuffFull);//Wait until messageBufferFull is not empty (until there are 15 messages waiting to be logged)
-    mtx_lock(&messageMutex);//Lock messageBuffer for waitForNewMessagesToLog()
-    
-    writeMessage(message);
-
-    mtx_unlock(&messageMutex);
-    sem_post(&messageBuffEmpty);//Increment the messageBufferEmpty so it knows there is one more message to log
 }

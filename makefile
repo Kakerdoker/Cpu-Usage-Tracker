@@ -9,9 +9,12 @@ output: $(OBJECTS) obj/main.o
 test: $(OBJECTS) obj/tests.o
 	$(CC) $(OBJECTS) obj/tests.o -o test
 
-obj/%.o: src/%.c
+obj/%.o: src/%.c | obj
 	$(CC) $(CFLAGS) $(WALL) -o $@ $<
 
+obj:
+	mkdir -p $@
+
 clean:
-	rm $(OBJECTS) obj/tests.o obj/main.o output test
-	rm -rf logs
+	rm -rf logs testLogs obj
+	rm output test

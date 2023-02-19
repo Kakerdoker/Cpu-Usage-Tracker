@@ -10,7 +10,7 @@ void initialize(){
     initializeGlobalVariables();
     initializeMutexes();
     initializeSemaphores();
-    initializeLogger();
+    initializeLogger("logs","logs.txt");
     allocateBufferMemory();
     createThreads();
 }
