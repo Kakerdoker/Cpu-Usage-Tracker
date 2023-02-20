@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "../inc/tests.h"
 #include "../inc/buffers.h"
 #include "../inc/global.h"
 #include "../inc/reader.h"
@@ -11,11 +12,11 @@
 #include "../inc/watchdog.h"
 #include "../inc/logger.h"
 
-char *tempString1, *tempString2, *realString, *correctString, *testedString;
+static char *tempString1, *tempString2, *realString, *correctString, *testedString;
 
-thrd_t logger, tester;
+static thrd_t logger, tester;
 
-void collectTestGarbage(){
+static void collectTestGarbage(void){
     free(correctString);
     free(testedString);
     free(tempString1);
@@ -23,21 +24,21 @@ void collectTestGarbage(){
     free(realString);
 }
 
-void cleanUp(){
+static void cleanUp(void){
     collectTestGarbage();
     collectBufferGarbage();
     destroySemaphores();
 }
 
 //Works like an assert but cleans up everything and prints a specified message before exiting
-void myAssert(int statement, char* message){
+static void myAssert(const int statement, const char* message){
     if(statement != 1){
         cleanUp();
         printf("TEST FAILED: %s\n", message);
         exit(1);
     }
     
-};
+}
 
 /*
 
@@ -46,7 +47,7 @@ void myAssert(int statement, char* message){
     READER TESTING METHODS BELOW
 */
 
-void readFromStatFileWithSetContent(char* content){
+static void readFromStatFileWithSetContent(const char* content){
     //Fill out statFile with an example proc/stat file (with some gibberish added to make it a little bit harder for the program).
     FILE *statFile = fopen("tests/statTest", "w");
     fprintf(statFile, "%s", content);
@@ -58,8 +59,8 @@ void readFromStatFileWithSetContent(char* content){
 }
 
 //Test if variables were corretly read and put into the buffer.
-void TEST_VariablesReadFromFile(int number){
-    for(int core = 0; core < cpuCoreAmount; core++){
+static void TEST_VariablesReadFromFile(const long unsigned int number){
+    for(unsigned int core = 0; core < cpuCoreAmount; core++){
         myAssert(currentCpuInfoBuffer[core].user == number, "User cpu usage wasn't read properly");
         myAssert(currentCpuInfoBuffer[core].nice == number, "Nice cpu usage wasn't read properly");
         myAssert(currentCpuInfoBuffer[core].system == number, "System cpu usage wasn't read properly");
@@ -72,8 +73,8 @@ void TEST_VariablesReadFromFile(int number){
 }
 
 //Test if everything copied corretly.
-void TEST_CopyBeforeNewRead(){
-    for(int core = 0; core < cpuCoreAmount; core++){
+static void TEST_CopyBeforeNewRead(void){
+    for(unsigned int core = 0; core < cpuCoreAmount; core++){
         myAssert(currentCpuInfoBuffer[core].user == previousCpuInfoBuffer[core].user, "User cpu usage wasn't copied properly");
         myAssert(currentCpuInfoBuffer[core].nice == previousCpuInfoBuffer[core].nice, "Nice cpu usage wasn't copied properly");
         myAssert(currentCpuInfoBuffer[core].system == previousCpuInfoBuffer[core].system, "System cpu usage wasn't copied properly");
@@ -86,8 +87,8 @@ void TEST_CopyBeforeNewRead(){
 }
 
 //Test if newly read variables changed correctly.
-void TEST_CopyAfterNewRead(){
-    for(int core = 0; core < cpuCoreAmount; core++){
+static void TEST_CopyAfterNewRead(void){
+    for(unsigned int core = 0; core < cpuCoreAmount; core++){
         myAssert(currentCpuInfoBuffer[core].user != previousCpuInfoBuffer[core].user, "User cpu usage wasn't read properly the second time");
         myAssert(currentCpuInfoBuffer[core].nice != previousCpuInfoBuffer[core].nice, "Nice cpu usage wasn't read properly the second time");
         myAssert(currentCpuInfoBuffer[core].system != previousCpuInfoBuffer[core].system, "System cpu usage wasn't read properly the second time");
@@ -105,9 +106,10 @@ void TEST_CopyAfterNewRead(){
 */
 
 //Test if cpu usage is calculated correctly.
-void TEST_CalculatingCpuUsage(){
-    for(int core = 0; core < cpuCoreAmount; core++){
-        myAssert(cpuUsageBuffer[core] == ((float)2/3)*100, "ERROR Percentage calculated incorrectly!");
+static void TEST_CalculatingCpuUsage(void){
+    for(unsigned int core = 0; core < cpuCoreAmount; core++){
+        myAssert(cpuUsageBuffer[core] >= ((double)2/3)*100, "ERROR Percentage calculated incorrectly!");
+        myAssert(cpuUsageBuffer[core] <= ((double)2/3)*100, "ERROR Percentage calculated incorrectly!");
     }
 }
 
@@ -119,8 +121,8 @@ void TEST_CalculatingCpuUsage(){
 */
 
 //Test if a percentage bar has the right amount of #'s at edge cases.
-void TEST_percentageBarAtEdge(char* bar, int num){
-    char percentageBar[9];
+static void TEST_percentageBarAtEdge(const char* bar, const int num){
+    char percentageBar[10];
 
     //Create a bar and compare it with bar defined by bar argument.
     cpuUsageBuffer[0] = num;
@@ -133,7 +135,7 @@ void TEST_percentageBarAtEdge(char* bar, int num){
 }
 
 //Test if all percentage bar edgecases have the right amount of #'s.
-void TEST_everyPercentageBarEdge(){
+static void TEST_everyPercentageBarEdge(void){
     TEST_percentageBarAtEdge("---------", 0);
     TEST_percentageBarAtEdge("#--------", 10);
     TEST_percentageBarAtEdge("##-------", 20);
@@ -147,20 +149,21 @@ void TEST_everyPercentageBarEdge(){
 }
 
 //Test if what's going to be displayed using printer is done so correctly.
-void TEST_percentagePrints(){
-    for(int core = 0; core < cpuCoreAmount; core++){
+static void TEST_percentagePrints(void){
+    for(unsigned int core = 0; core < cpuCoreAmount; core++){
+        
         //Generate cpu usage bar using buffer values.
-        char percentageBar[9];
+        char percentageBar[10];
         strcpy(percentageBar, makePercentageBar(core));
-
         //Create a a string with 66.7% cpu usage. (Also make sure it doesn't go over allocated size of 128)
         myAssert(sprintf(correctString, "CPU%i - [######---] - 66.7%%\n",core+1) < 128, "correctString too big in TEST_percentagePrints()");
 
         //Create cpu usage string using buffer values. (Also make sure it doesn't go over allocated size of 128)
         myAssert(sprintf(testedString, "CPU%i - [%s] - %.1f%%\n",core+1 ,percentageBar, cpuUsageBuffer[core]) < 128, "testedString too big in TEST_percentagePrints()");
-
+        
         //Compare them
         myAssert(strcmp(correctString, testedString) == 0, "ERROR comparing percentage bars!");
+        
     }
 }
 
@@ -171,7 +174,7 @@ void TEST_percentagePrints(){
     WATCHDOG TESTING METHODS BELOW
 */
 
-void TEST_threadMessages(){
+static void TEST_threadMessages(void){
     myAssert(strcmp(getMessageFromThread(0), "Reader thread stopped responding, closing program!") == 0, "ERROR got incorrect message from reader thread!");
     myAssert(strcmp(getMessageFromThread(1), "Analyzer thread stopped responding, closing program!") == 0, "ERROR got incorrect message from analyzer thread !");
     myAssert(strcmp(getMessageFromThread(2), "Printer thread stopped responding, closing program!") == 0, "ERROR got incorrect message from printer thread!");
@@ -180,7 +183,7 @@ void TEST_threadMessages(){
 }
 
 //Checks if checkAllThreadResponses() returns appropriate value for every thread being responsive in the last 2 seconds.
-void TEST_twoSecondsResponse(){
+static void TEST_twoSecondsResponse(void){
     sem_post(&messageBuffEmpty);//So logger doesn't get blocked
 
     for(int thread = 0; thread < THREAD_AMOUNT; thread++){
@@ -192,7 +195,7 @@ void TEST_twoSecondsResponse(){
 }
 
 //Tests if checkAllThreadResponses() returns appropriate value for every thread being unresponsive for 3 seconds.
-void TEST_threeSecondsResponse(){
+static void TEST_threeSecondsResponse(void){
     sem_post(&messageBuffEmpty);//So logger doesn't get blocked
 
     //Since checkAllThreadResponses() checks threads from 0 to THREAD_AMOUNT and returns the first thread that doesn't respond,
@@ -205,7 +208,7 @@ void TEST_threeSecondsResponse(){
 }
 
 //Test to see if watchdog still checks for responsiveness even if semEmpty == 0, which means that logger is waiting for new messages to log.
-void TEST_loggerBlockForUnresponsivness(){
+static void TEST_loggerBlockForUnresponsivness(void){
     updateBuffer[THREAD_AMOUNT-1] = time(NULL) - 3;
     myAssert(checkLoggerThread() == -1, "Logger was waiting for message but watchdog still checked to see if it was responsive. Did you sem_post(&messageBuffEmpty) anywhere in the test without sem_wait afterwards?");
 }
@@ -217,9 +220,9 @@ void TEST_loggerBlockForUnresponsivness(){
     LOGGER TESTING METHODS BELOW
 */
 
-char logF[20] = "testLogs/logs.txt";
+static char logF[20] = "testLogs/logs.txt";
 
-void TEST_initializeLogger(){
+static void TEST_initializeLogger(void){
     //Delete files
     remove("testLogs/logs.txt");
     rmdir("testLogs");
@@ -239,12 +242,9 @@ void TEST_initializeLogger(){
     myAssert(strcmp("PROGRAM STARTED",testedString) == 0, "initializeLogger() didn't log the message PROGRAM STARTED");
 }
 
-void spamTwentyLogMessages(){
-    //Buffer size for messages is 16, so 20 will be enough to test if it leaks/overwrites/ignores messages.
-    for(int i = 0; i < 20; i++){
-        system("clear");
-        printf("Putting messages into logger: %i\n", i);
-
+static void spamFourtyLogMessages(void){
+    //Buffer size for messages is 16, so 40 will be enough to test if it leaks/overwrites/ignores messages.
+    for(int i = 0; i < 40; i++){
         //Make sure combined string doesn't go over allocated size of 128
         myAssert(sprintf(testedString, "testmessage %i", i) < 128, "testedString too big in spamTwentyLogMessages()");
         logMessage(testedString);
@@ -252,24 +252,18 @@ void spamTwentyLogMessages(){
 }
 
 //It takes a little under 9 seconds for the logger to finish logging all the messages into logs.txt
-void giveLoggerTenSecondsToFinish(){
-    for(int i = 9; i >= 0; i--){
-        sleep(1);
-        system("clear");
-        printf("Testing logger %i\n", i);
-    }
-    system("clear");
-}
 
-int putMessagesIntoLogger(){
-    spamTwentyLogMessages();
-    giveLoggerTenSecondsToFinish();
+static int putMessagesIntoLogger(void* args){
+    (void)args;//To stop unused variable warning
 
+    spamFourtyLogMessages();
+    sleep(1);//Give logger one second to process the messages
     thrd_detach(logger);
     thrd_exit(0);
 }
 
-void TEST_readMessagesFromLogger(){
+
+static void TEST_readMessagesFromLogger(void){
 
     FILE *loggerFile = fopen(logF, "r");
 
@@ -277,7 +271,7 @@ void TEST_readMessagesFromLogger(){
     fscanf(loggerFile, "%*s %*s %*s %*s %*s %*s %*s %*s");
 
     //Go through all the spammed messages
-    for(int i = 0; i < 20; i++){
+    for(int i = 0; i < 40; i++){
         fscanf(loggerFile, "%s %s %*s %*s %*s %*s %*s %*s", tempString1, tempString2);
 
         //Make sure combined strings don't go over allocated size of 128
@@ -293,11 +287,12 @@ void TEST_readMessagesFromLogger(){
     myAssert(strcmp(realString,testedString) == 0, "Logger didn't log a spammed message correctly.");
 }
 
-//Asynchronously ask 20 messages to be logged while also logging these messages at the same time
-void TEST_overflowingMessageBuffer(){
-    printf("Starting threads to test logger\n");
+//Asynchronously ask 40 messages to be logged while also logging these messages at the same time
+static void TEST_overflowingMessageBuffer(void){
+    
+    unsigned int delay = 1000;//Make the logger wait only 1000 microseconds between logging messages, if this value changes the sleep(1) inside putMessagesIntoLogger() needs to be adjusted properly
     thrd_create(&tester, putMessagesIntoLogger, NULL);//Function to ask for the messages to be logged
-    thrd_create(&logger, waitForNewMessagesToLog, NULL);//Function from logger.c to be tested
+    thrd_create(&logger, loggerLoop, &delay);//Function from logger.c to be tested
    
     thrd_join(tester, NULL);
     thrd_join(logger, NULL);
@@ -307,13 +302,13 @@ void TEST_overflowingMessageBuffer(){
 }
 
 //Check if logger correctly logs that the program has closed
-void TEST_closing(){
+static void TEST_closing(void){
     //Call the function we are testing
     closeLogger();
     
     FILE *loggerFile = fopen(logF, "r");
-    //Skip first 21 lines
-    for(int i = 0; i < 21; i++){
+    //Skip first 41 lines
+    for(int i = 0; i < 41; i++){
         fscanf(loggerFile, "%*s %*s %*s %*s %*s %*s %*s %*s");
     }
     fscanf(loggerFile, "%s %s %*s %*s %*s %*s %*s %*s", tempString1, tempString2);   
@@ -332,7 +327,7 @@ void TEST_closing(){
     METHODS WITH TESTS FOR EACH SEGMENT OF THE PROGRAM
 */
 
-void TEST_readerMethods(){
+static void TEST_readerMethods(void){
     
     readFromStatFileWithSetContent("gfdklgjfdlkgjdflgf  4000 4000 4000 4000 4000 0 4000 0 0 0\nAAAAAAAAAAAAAAAAAA 1000 1000 1000 1000 1000 0 1000 0 0 0\nBBBBBBBBBBBBB 1000 1000 1000 1000 1000 0 1000 0 0 0\nC 1000 1000 1000 1000 1000 0 1000 0 0 0\nDDDDDDDDDDDDDD 1000 1000 1000 1000 1000 0 1000 0 0 0\n\nintr 23529732 12 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 829383 110335 21 499676 91 56 0 68 15 23 2804435 42 7649 916 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n\nDOESN'T\nMATTER\nSHOULD\nIGNORE\nTHIS\nPART\n\nctxt 120642943\nbtime 1676472680\nprocesses 17608\nprocs_running 1\nprocs_blocked 0\n");
 
@@ -352,20 +347,20 @@ void TEST_readerMethods(){
     TEST_CopyAfterNewRead();
 }
 
-void TEST_analyzerMethods(){
+static void TEST_analyzerMethods(void){
     //Calculate the usage
     addCpuUsageToBuffer();
     //Check if it's equal to 66.6% on all cores.
     TEST_CalculatingCpuUsage();
 }
 
-void TEST_printerMethods(){
+static void TEST_printerMethods(void){
     //Make sure printer prints out everything correctly. Since TEST_everyPercentageBarEdge() changes cpuUsageBuffer[0] and TEST_percentagePrints() uses it, make sure TEST_percentagePrints() is always tested first.
     TEST_percentagePrints();
     TEST_everyPercentageBarEdge(); 
 }
 
-void TEST_watchdogMethods(){
+static void TEST_watchdogMethods(void){
     TEST_twoSecondsResponse();
     TEST_threeSecondsResponse();
     TEST_threadMessages();
@@ -373,14 +368,14 @@ void TEST_watchdogMethods(){
     TEST_loggerBlockForUnresponsivness();
 }
 
-void TEST_loggerMethods(){
+static void TEST_loggerMethods(void){
     TEST_initializeLogger();
     TEST_overflowingMessageBuffer();
     TEST_closing();
 }
 
 
-void initializeTestVariables(){
+static void initializeTestVariables(void){
     correctString = malloc(sizeof(char)*128);
     testedString = malloc(sizeof(char)*128);
     tempString1 = malloc(sizeof(char)*128);
@@ -388,7 +383,7 @@ void initializeTestVariables(){
     realString = malloc(sizeof(char)*128);
 }
 
-void initializeVariables(){
+static void initializeVariables(void){
     allocateBufferMemory();
     initializeSemaphores();
     initializeTestVariables();

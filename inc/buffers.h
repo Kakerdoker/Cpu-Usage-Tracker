@@ -4,35 +4,58 @@
 #include <threads.h>
 #include <semaphore.h>
 
+//Amount of threads used by program (excluding watchdog)
 #define THREAD_AMOUNT 4
 
+//Useful information from proc/stat
 struct CpuInfo{
     unsigned long user, nice, system, idle, iowait, irq, softirq, steal;
 };
 
-extern mtx_t cpuInfoMutex, cpuUsageMutex, watchdogUpdateMutex, messageMutex;
-extern sem_t messageBuffFull, messageBuffEmpty;
+extern mtx_t cpuInfoMutex;
+extern mtx_t cpuUsageMutex;
+extern mtx_t watchdogUpdateMutex;
+extern mtx_t messageMutex;
+extern sem_t messageBuffFull;
+extern sem_t messageBuffEmpty;
 
+//Buffer holding the information last read from proc/stat
 extern struct CpuInfo* currentCpuInfoBuffer;
+
+//Buffer holding the information read before the last read from proc/stat
 extern struct CpuInfo* previousCpuInfoBuffer;
-extern float* cpuUsageBuffer; 
+
+//Buffer holding information of % cpu usage for every active core
+extern double* cpuUsageBuffer; 
+
+//Buffer holding information of the last time every thread updated it's activity (excluding watchdog)
 extern time_t updateBuffer[THREAD_AMOUNT];
 
-char* readMessage();
-void writeMessage(char*);
+//Reads message from a circular buffer
+char* readMessage(void);
 
-// void writeToMessageBuffer(char*);
-// char* readFromMessageBuffer();
+//Writes messages to a circular buffer
+void writeMessage(const char*);
 
-void updateWatchdogBuffer();
+//Updates the watchdog buffer with the current time
+void updateWatchdogBuffer(const int);
 
-void initializeSemaphores();
-void destroySemaphores();
+//Initializes all the semaphores
+void initializeSemaphores(void);
 
-void initializeMutexes();
-void destroyMutexes();
+//Destroys all the semaphores
+void destroySemaphores(void);
 
-void allocateBufferMemory();
-void collectBufferGarbage();
+//Initializes all the mutexes
+void initializeMutexes(void);
+
+//Destroys all the mutexes
+void destroyMutexes(void);
+
+//Allocates memory for all the buffers
+void allocateBufferMemory(void);
+
+//Frees memory from all the buffers
+void collectBufferGarbage(void);
 
 #endif

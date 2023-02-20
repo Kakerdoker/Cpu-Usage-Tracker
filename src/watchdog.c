@@ -4,39 +4,40 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include "../inc/watchdog.h"
 #include "../inc/buffers.h"
 #include "../inc/destroyer.h"
 #include "../inc/threads.h"
 #include "../inc/logger.h"
 
-int messageBuffEmptyValue;
+static int messageBuffEmptyValue;
 
-char* getMessageFromThread(int thread){
+//What: Gets the appropriate message depending on which thread failed
+//What for: So it can be logged
+char* getMessageFromThread(const int thread){
     switch (thread){
         case 0:
             return "Reader thread stopped responding, closing program!";
-        break;
         case 1:
             return "Analyzer thread stopped responding, closing program!";
-        break;
         case 2:
             return "Printer thread stopped responding, closing program!";
-        break;
         case 3:
             return "Logger thread stopped responding, closing program!";
-        break;
         default:
             return "Unknown thread stopped responding, closing program!";
-        break;
     }
 }
 
-int checkResponseLongerThan2Seconds(int thread){
+//What: Checks if the given thread hasn't responded for longer than 2 seconds
+//What for: So the program can be closed if it didn't
+static int checkResponseLongerThan2Seconds(const int thread){
     long timeSinceLastUpdate = time(NULL) - updateBuffer[thread];
     return timeSinceLastUpdate > 2 ? 1 : 0;
 }
 
-int checkThreadsWithoutLogger(){
+//What: Checks if every thread except for logger is responsive 
+static int checkThreadsWithoutLogger(void){
     for(int thread = 0; thread < THREAD_AMOUNT-1; thread++){
         if(checkResponseLongerThan2Seconds(thread)){
             return thread;
@@ -45,7 +46,9 @@ int checkThreadsWithoutLogger(){
     return -1;
 }
 
-int checkLoggerThread(){
+//What: Checks if logger is being responsive, but only if it has anything in it's buffer
+//What for: So the logger won't be seen as unresponsive if it is waiting for messages
+int checkLoggerThread(void){
     //Check if message buffer is not empty, if it is empty, that means the logger can't update it's response, so don't check for it.
     sem_getvalue(&messageBuffEmpty, &messageBuffEmptyValue);
     if(messageBuffEmptyValue > 0){
@@ -56,8 +59,9 @@ int checkLoggerThread(){
     return -1;
 }
 
-//Go through every thread and check if any of them took longer than 2 seconds to respond then return that thread.
-int checkAllThreadResponses(){
+//What: Goes through every thread and returns the first one that is being unresponsive.
+//What for: So the program can be closed if any of them are.
+int checkAllThreadResponses(void){
     int threadResponse;
     threadResponse = checkThreadsWithoutLogger();
     if(threadResponse != -1){
@@ -67,21 +71,23 @@ int checkAllThreadResponses(){
     return threadResponse;
 }
 
-/*
-    If stopEverything recieves a non -1 value, it means that some thread stopped responding.
-    (It would be way more readable if stopEverything was just inside checkAllThreadResponses() instead, but it needs to be it's own function to make testing checkAllThreadResponses() easier.)
-*/
-void stopEverything(int thread){
+
+//What: Looks if the value is not -1, which mean that the argument is the number of a thread that's unresponsive
+static void stopEverything(const int thread){
     if(thread != -1){
         mtx_unlock(&watchdogUpdateMutex);
         logMessage(getMessageFromThread(thread));
-        closeProgram(getMessageFromThread(thread));
+        closeProgramByWatchdog(getMessageFromThread(thread));
     }
 }
 
-int checkLastUpdate(){
+//What: Calls stopEverything() every (args) microseconds and uses mutexes to lock every other thread from updating themselves
+//What for: So the data won't change when it's being read by the watchdog
+int checkLastUpdate(void* args){
+    unsigned int delay = *(unsigned int *)args;
+
     while(threadsActive){
-        usleep(500000);//Check every half a second.
+        usleep(delay);
         mtx_lock(&watchdogUpdateMutex);//Lock the watchdog mutex so updateWatchdogBuffer() doesn't update when checking buffers.
 
         stopEverything(checkAllThreadResponses());

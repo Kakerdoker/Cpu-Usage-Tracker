@@ -5,12 +5,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "../inc/buffers.h"
 #include "../inc/global.h"
 #include "../inc/logger.h"
 
-struct CpuInfo{
-    unsigned long user, nice, system, idle, iowait, irq, softirq, steal;
-};
 
 mtx_t cpuInfoMutex, cpuUsageMutex, watchdogUpdateMutex, messageMutex;
 sem_t messageBuffEmpty, messageBuffFull;
@@ -18,30 +16,34 @@ sem_t messageBuffEmpty, messageBuffFull;
 struct CpuInfo* currentCpuInfoBuffer;
 struct CpuInfo* previousCpuInfoBuffer;
 
-float* cpuUsageBuffer;
+double* cpuUsageBuffer;
 
-/*
-    Circular buffer for messages.
-    Use semaphores before using readMessage() and writeMessage() so new messages don't overwrite old messages that haven't been already read.
-*/
-char** messageBuffer;
-int readerIndex = 0, writerIndex = 0;
-char* readMessage(){
+static char** messageBuffer;
+static int readerIndex = 0, writerIndex = 0;
+
+//What: Reads message from a circular buffer
+//What for: So it can be logged
+char* readMessage(void){
     char* message = messageBuffer[readerIndex];
     readerIndex++;
     readerIndex %= 16;
     return message;
 }
 
-void writeMessage(char* message){
+//What: Writes message to a circular buffer
+//What for: So it can be read by the logger
+void writeMessage(const char* message){
     strcpy(messageBuffer[writerIndex], message);
     writerIndex++;
     writerIndex %= 16;
 }
 
-//Four updates for four different threads (excluding watchdog). To make sure that if one thread doesn't work, the others won't keep updating the watchdog.
-time_t updateBuffer[4];
-void updateWatchdogBuffer(int threadIndex){
+
+time_t updateBuffer[THREAD_AMOUNT];
+
+//What: Updates the given threadIndex inside updateBuffer with the current time
+//What for: So the latest update can be read by the watchdog
+void updateWatchdogBuffer(const int threadIndex){
 
     mtx_lock(&watchdogUpdateMutex);//Lock the watchdog mutex so checkLastUpdate() doesn't check for updates while changing them.
 
@@ -56,38 +58,39 @@ void updateWatchdogBuffer(int threadIndex){
 
 }
 
-void initializeSemaphores(){
+void initializeSemaphores(void){
     sem_init(&messageBuffEmpty, 0, 0);
     sem_init(&messageBuffFull, 0, 15);
 }
 
-void destroySemaphores(){
+void destroySemaphores(void){
     sem_destroy(&messageBuffEmpty);
     sem_destroy(&messageBuffFull);
 }
 
-void initializeMutexes(){
+void initializeMutexes(void){
     mtx_init(&cpuInfoMutex, mtx_plain);
     mtx_init(&cpuUsageMutex, mtx_plain);
     mtx_init(&watchdogUpdateMutex, mtx_plain); 
     mtx_init(&messageMutex, mtx_plain);   
 }
 
-void destroyMutexes(){
+void destroyMutexes(void){
     mtx_destroy(&cpuInfoMutex);
     mtx_destroy(&cpuUsageMutex);
     mtx_destroy(&watchdogUpdateMutex);    
     mtx_destroy(&messageMutex);
 }
 
-void allocateBufferMemory(){
+void allocateBufferMemory(void){
     currentCpuInfoBuffer = malloc(sizeof(struct CpuInfo)*cpuCoreAmount);
     previousCpuInfoBuffer = malloc(sizeof(struct CpuInfo)*cpuCoreAmount);
-    for(int i = 0; i < cpuCoreAmount; i++){
-        currentCpuInfoBuffer[i] = previousCpuInfoBuffer[i] = (struct CpuInfo){0,0,0,0,0,0,0,0};
+    for(unsigned int core = 0; core < cpuCoreAmount; core++){
+        //Fill both buffers with 0's to prevent junk data being read by the analyzer.
+        currentCpuInfoBuffer[core] = previousCpuInfoBuffer[core] = (struct CpuInfo){0,0,0,0,0,0,0,0};
     }
     
-    cpuUsageBuffer = malloc(sizeof(float)*cpuCoreAmount);
+    cpuUsageBuffer = malloc(sizeof(double)*cpuCoreAmount);
     
     messageBuffer = malloc(sizeof(char*)*16);
     for(int i = 0; i < 16; i++){
@@ -95,7 +98,7 @@ void allocateBufferMemory(){
     }
 }
 
-void collectBufferGarbage(){
+void collectBufferGarbage(void){
     free(currentCpuInfoBuffer);
     free(previousCpuInfoBuffer);
     free(cpuUsageBuffer);

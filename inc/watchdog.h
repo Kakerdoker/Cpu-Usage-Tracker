@@ -1,13 +1,19 @@
 #ifndef WATCHDOG_H
 #define WATCHDOG_H
 
-//Used for testing
-char* getMessageFromThread(int);
-int checkResponseLongerThan2Seconds(int);
-int checkAllThreadResponses();
-int checkLoggerThread();
+//Checks if all threads are responsive every (args) microseconds
+int checkLastUpdate(void*);
 
-//Used for other funcitons
-int checkLastUpdate();
+/*
+    Function declarations used only for tests
+*/
+//Gets the appropriate message depending on which thread failed
+char* getMessageFromThread(const int);
+
+//Checks if logger is being responsive
+int checkLoggerThread(void);
+
+//Checks if all the threads are being responsive
+int checkAllThreadResponses(void);
 
 #endif

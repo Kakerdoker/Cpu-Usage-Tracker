@@ -1,6 +1,6 @@
-CC?=gcc
+CC=clang-11
 CFLAGS=-c
-WALL=-Wall
+WALL=-Weverything
 OBJECTS=obj/analyzer.o obj/buffers.o obj/global.o obj/printer.o obj/reader.o obj/threads.o obj/watchdog.o obj/destroyer.o obj/logger.o
 
 output: $(OBJECTS) obj/main.o
@@ -16,5 +16,6 @@ obj:
 	mkdir -p $@
 
 clean:
+	clear
 	rm -rf logs testLogs obj
 	rm output test
