@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "../inc/main.h"
 #include "../inc/global.h"
 #include "../inc/buffers.h"
 #include "../inc/threads.h"
