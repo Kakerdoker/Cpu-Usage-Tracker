@@ -57,7 +57,7 @@ void initializeLogger(const char* dir, const char* file){
 
 //What: Logs the time the program has closed
 //What for: So logs.txt is easier to read / to know if the program completed execution until the end
-void closeLogger(void){
+void logClose(void){
     logFile = fopen(logDir, "a");
 
     currentTime = time(NULL);

@@ -8,7 +8,7 @@ void logMessage(const char*);
 void initializeLogger(const char*,const char*);
 
 //Logs the time the program has closed
-void closeLogger(void);
+void logClose(void);
 
 //Calls logMessageFromBuffer() every (args) microseconds
 int loggerLoop(void*);

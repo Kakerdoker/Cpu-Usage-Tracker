@@ -21,4 +21,7 @@ void detachThreadsExceptLogAndWatch(void);
 //Detaches the logger thread
 void detachLogger(void);
 
+//Detaches the watchdog thread and closes program
+void detachWatchdog(void) __attribute__ ((noreturn));
+
 #endif

@@ -1,6 +1,6 @@
 CC=clang-11
-CFLAGS=-c
-WALL=-Weverything
+CFLAGS=-c -g
+WALL=-Weverything -Wno-reserved-id-macro -Wno-disabled-macro-expansion
 OBJECTS=obj/analyzer.o obj/buffers.o obj/global.o obj/printer.o obj/reader.o obj/threads.o obj/watchdog.o obj/destroyer.o obj/logger.o
 TESTSOBJECTS=obj/tests_analyzer.o obj/tests_basic.o obj/tests_logger.o obj/tests_printer.o obj/tests_reader.o obj/tests_watchdog.o
 

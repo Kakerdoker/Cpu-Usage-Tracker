@@ -90,7 +90,7 @@ static void TEST_overflowingMessageBuffer(void){
 //Check if logger correctly logs that the program has closed
 static void TEST_closing(void){
     //Call the function we are testing
-    closeLogger();
+    logClose();
     
     FILE *loggerFile = fopen(logF, "r");
     //Skip first 41 lines
@@ -103,7 +103,7 @@ static void TEST_closing(void){
     //Make sure combined string doesn't go over allocated size of 128
     myAssert(sprintf(testedString, "%s %s",tempString1, tempString2) < 128, "testedString too big in TEST_closing()");
     
-    myAssert(strcmp(testedString,"PROGRAM CLOSED") == 0, "closeLogger() didn't log the message \"PROGRAM CLOSED\"");
+    myAssert(strcmp(testedString,"PROGRAM CLOSED") == 0, "logClose() didn't log the message \"PROGRAM CLOSED\"");
 }
 
 

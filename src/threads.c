@@ -1,5 +1,6 @@
 #include <threads.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "../inc/buffers.h"
 #include "../inc/threads.h"
@@ -61,6 +62,7 @@ void runThreads(void){
 
 //What for: So when the watchdog thread detached all the threads it doesn't detach itself
 void detachThreadsExceptLogAndWatch(void){
+    threadsActive = 0;
     if(thrd_detach(readFileThread) != thrd_success)
         logMessage("Couldn't detach reader thread (threads.c)");
 
@@ -79,7 +81,14 @@ void detachThreadsExceptLogger(void){
         logMessage("Couldn't detach watchdog thread (threads.c)");
 }
 
+void detachWatchdog(void){
+    if(thrd_detach(watchdogThread) != thrd_success)
+        printf("Couldn't detach logger thread (threads.c)");
+    exit(0);
+}
+
 void detachLogger(void){
+    loggerActive = 0;
     if(thrd_detach(loggerThread) != thrd_success)
         printf("Couldn't detach logger thread (threads.c)");
 }
