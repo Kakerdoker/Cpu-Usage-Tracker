@@ -24,5 +24,5 @@ int main(){
 
     initialize();
     runThreads();
-    exit(0);
+    
 }

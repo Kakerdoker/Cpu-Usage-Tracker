@@ -3,6 +3,7 @@
 
 #include "../inc/global.h"
 #include "../inc/logger.h"
+#include "../inc/destroyer.h"
 
 unsigned int cpuCoreAmount;
 
@@ -11,8 +12,7 @@ unsigned int cpuCoreAmount;
 static void setAmountOfCpuCores(void){
     //If user has no cpu cores stop the application
     if(sysconf(_SC_NPROCESSORS_ONLN) == 0){
-        logMessage("The cpu somehow read that there are 0 threads available (global.c).");
-        exit(1);//todo: exit from destroyer
+        closeProgramByError("The cpu somehow read that there are 0 threads available (global.c).");
     }
     cpuCoreAmount = (unsigned int)sysconf(_SC_NPROCESSORS_ONLN);
 }

@@ -14,7 +14,6 @@
 #include "../inc/logger.h"
 
 
-
 static void collectGarbage(){
     collectBufferGarbage();
     closeStatFile();
@@ -70,19 +69,28 @@ static void logReceivedSignal(const int signum){
     logMessage(msg);
 }
 
-static sig_atomic_t sigLock = 1;
-//What: Closes program in the correct sequence for being called from a termination signal
+//What: Closes program in the correct sequence
 //What for: So it can be closed properly without any memory leaks or any other issues
-static void closeProgramBySignal(const int signum){
-    if(sigLock){
-        sigLock = 0;
+__attribute__ ((noreturn)) static void closeProgram(void){
+    detachThreadsExceptLogger();
+    sleep(1);//Give the threads a second to finish before cleaning everything.
+    waitForLoggerToFinishLogging();
+    collectGarbage();
+    exit(0);
+}
 
+void closeProgramByError(char* errorMessage){
+    printf("\n%s\n", errorMessage);
+    logMessage(errorMessage);
+    closeProgram();
+}
+
+static sig_atomic_t sigLock = 1;
+static void closeProgramBySignal(const int signum){
+    if(sigLock){//Make sure with sigLock that it can happen only once
+        sigLock = 0;
         logReceivedSignal(signum);
-        detachThreadsExceptLogger();
-        sleep(1);//Give the threads a second to finish before cleaning everything.
-        waitForLoggerToFinishLogging();
-        collectGarbage();
-        exit(0);
+        closeProgram();
     }
 }
 

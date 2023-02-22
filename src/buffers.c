@@ -8,6 +8,7 @@
 #include "../inc/buffers.h"
 #include "../inc/global.h"
 #include "../inc/logger.h"
+#include "../inc/destroyer.h"
 
 
 mtx_t cpuInfoMutex, cpuUsageMutex, watchdogUpdateMutex, messageMutex;
@@ -51,8 +52,7 @@ void updateWatchdogBuffer(const int threadIndex){
         updateBuffer[threadIndex] = time(NULL);
     }
     else{
-        logMessage("Tried to update index out of range (buffers.c)");
-        exit(1);//todo:normal exit
+        closeProgramByError("Tried to update index out of range (buffers.c)");
     }
     mtx_unlock(&watchdogUpdateMutex);
 

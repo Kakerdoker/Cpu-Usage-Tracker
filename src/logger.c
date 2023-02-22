@@ -69,10 +69,18 @@ void logClose(void){
 
 //What: Reads message from message buffer and writes it to logs.txt
 static void logMessageFromBuffer(void){
+    char msg[128];
+    strcpy(msg, readMessage());
+
+    //Don't log the message if the first char is garbage
+    //(Spamming SIGINT would make logger print char -32 for some reason, this is a roundabout way of fixing that issue)
+    if((int)msg[0] < 0)
+        return;
+
     currentTime = time(NULL);
     logFile = fopen(logDir, "a");
     //Read the last message in the message buffer and combine it with the current time, then print it to the log file.
-    fprintf(logFile, "%s --- %s",readMessage(), asctime(localtime(&currentTime)));
+    fprintf(logFile, "%s --- %s",msg, asctime(localtime(&currentTime)));
     fclose(logFile);
 }
 
