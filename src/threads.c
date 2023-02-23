@@ -42,53 +42,19 @@ void createThreads(void){
     createThreadLoop(&watchdogThread, checkLastUpdate, "Couldn't create watchdog thread (threads.c).", &delayArr[4], 500000);
 }
 
-void runThreads(void){
-    if(thrd_join(loggerThread, NULL) != thrd_success)
-        printf("Couldn't join logger thread (threads.c)");  
-
-    if(thrd_join(readFileThread, NULL) != thrd_success)
-        logMessage("Couldn't join reader thread (threads.c)");
-
-    if(thrd_join(analyzeThread, NULL) != thrd_success)
-        logMessage("Couldn't join analyzer thread (threads.c)");
+void joinThreads(void){
+    if(thrd_join(watchdogThread, NULL) != thrd_success)
+        logMessage("Couldn't join watchdog thread (threads.c)");
 
     if(thrd_join(printThread, NULL) != thrd_success)
         logMessage("Couldn't join printer thread (threads.c)");
 
-    if(thrd_join(watchdogThread, NULL) != thrd_success)
-        logMessage("Couldn't join watchdog thread (threads.c)");   
-}
+    if(thrd_join(analyzeThread, NULL) != thrd_success)
+        logMessage("Couldn't join analyzer thread (threads.c)");
 
+    if(thrd_join(readFileThread, NULL) != thrd_success)
+        logMessage("Couldn't join reader thread (threads.c)");
 
-//What for: So when the watchdog thread detached all the threads it doesn't detach itself
-void detachThreadsExceptLogAndWatch(void){
-    threadsActive = 0;
-    if(thrd_detach(readFileThread) != thrd_success)
-        logMessage("Couldn't detach reader thread (threads.c)");
-
-    if(thrd_detach(analyzeThread) != thrd_success)
-        logMessage("Couldn't detach analyzer thread (threads.c)");
-
-    if(thrd_detach(printThread) != thrd_success)
-        logMessage("Couldn't detach printer thread (threads.c)");
-}
-
-//What for: So when the threads are being detached the logger still has time to log
-void detachThreadsExceptLogger(void){
-    detachThreadsExceptLogAndWatch();
-    
-    if(thrd_detach(watchdogThread) != thrd_success)
-        logMessage("Couldn't detach watchdog thread (threads.c)");
-}
-
-void detachWatchdog(void){
-    if(thrd_detach(watchdogThread) != thrd_success)
-        printf("Couldn't detach logger thread (threads.c)");
-    exit(0);
-}
-
-void detachLogger(void){
-    loggerActive = 0;
-    if(thrd_detach(loggerThread) != thrd_success)
-        printf("Couldn't detach logger thread (threads.c)");
+    if(thrd_join(loggerThread, NULL) != thrd_success)
+        printf("Couldn't join logger thread (threads.c)");
 }

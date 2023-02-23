@@ -23,6 +23,6 @@ static void initialize(void){
 int main(){
 
     initialize();
-    runThreads();
-    
+    joinThreads();
+
 }

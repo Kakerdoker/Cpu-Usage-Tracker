@@ -21,6 +21,12 @@ static void collectGarbage(){
     destroySemaphores();
 }
 
+//What for: So the logger can exit without being stuck on a semaphore and without causing any memory leaks
+static void exitLogger(void){
+    loggerActive = 0;
+    sem_post(&messageBuffEmpty);
+}
+
 //What: Gets stuck in a loop until there are no messages waiting to be logged or 5 seconds have passed
 //What for: So if the program crashes we can know what happened by looking inside logs.txt
 static void waitForLoggerToFinishLogging(void){
@@ -34,34 +40,31 @@ static void waitForLoggerToFinishLogging(void){
         sem_getvalue(&messageBuffEmpty, &messageBuffEmptyValue);
         sleep(1);
     }
-    printf("Done.\n");
     logClose();
-    detachLogger();
+    exitLogger();
 }
 
 //What: Closes program in the correct sequence for being called from the watchdog thread
 //What for: So it can be closed properly without any memory leaks or any other issues
 void closeProgramByWatchdog(const char* message) {
-    detachThreadsExceptLogAndWatch();
+    threadsActive = 0;
     sleep(1);//Give the threads a second to finish before cleaning everything.
     waitForLoggerToFinishLogging();
     collectGarbage();
     
     printf("%s\n", message);
-    detachWatchdog();
-    //thrd_exit(0);//Detatch itself (watchdog thread)
 }
 
 static char msg[64];
 static void logReceivedSignal(const int signum){
     switch(signum){
-        case 2:
+        case SIGINT:
             strcpy(msg,"Signal received: SIGINT");
         break;
-        case 3:
+        case SIGQUIT:
             strcpy(msg,"Signal received: SIGQUIT");
         break;
-        case 15:
+        case SIGTERM:
             strcpy(msg,"Signal received: SIGTERM");
         break;
     }
@@ -71,12 +74,11 @@ static void logReceivedSignal(const int signum){
 
 //What: Closes program in the correct sequence
 //What for: So it can be closed properly without any memory leaks or any other issues
-__attribute__ ((noreturn)) static void closeProgram(void){
-    detachThreadsExceptLogger();
+static void closeProgram(void){
+    threadsActive = 0;
     sleep(1);//Give the threads a second to finish before cleaning everything.
     waitForLoggerToFinishLogging();
     collectGarbage();
-    exit(0);
 }
 
 void closeProgramByError(char* errorMessage){

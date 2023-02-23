@@ -34,9 +34,9 @@ void myAssert(const int statement, const char* message){
 }
 
 void initializeTestVariables(void){
-    correctString = malloc(sizeof(char)*128);
-    testedString = malloc(sizeof(char)*128);
-    tempString1 = malloc(sizeof(char)*128);
-    tempString2 = malloc(sizeof(char)*128);
-    realString = malloc(sizeof(char)*128);
+    correctString = calloc(128, sizeof(char));
+    testedString = calloc(128, sizeof(char));
+    tempString1 = calloc(128, sizeof(char));
+    tempString2 = calloc(128, sizeof(char));
+    realString = calloc(128, sizeof(char));
 }

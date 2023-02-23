@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <semaphore.h>
 
 #include "../inc/logger.h"
+#include "../inc/buffers.h"
+#include "../inc/threads.h"
 
 #include "../inc/tests_logger.h"
 #include "../inc/tests_basic.h"
@@ -39,12 +42,19 @@ static void spamFourtyLogMessages(void){
     }
 }
 
+//Exits from the logger without creating memory leaks and makes sure it isn't stuck on a semaphore
+static void exitLogger(void){
+    loggerActive = 0;
+    sem_post(&messageBuffEmpty);
+}
+
 static int putMessagesIntoLogger(void* args){
     (void)args;//To stop unused variable warning
 
     spamFourtyLogMessages();
     sleep(1);//Give logger one second to process the messages
-    thrd_detach(logger);
+    
+    exitLogger();
     thrd_exit(0);
 }
 

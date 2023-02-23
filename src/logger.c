@@ -9,6 +9,7 @@
 #include "../inc/logger.h"
 #include "../inc/buffers.h"
 #include "../inc/threads.h"
+#include "../inc/destroyer.h"
 
 static struct stat st = {0};
 static char logDir[32];
@@ -37,7 +38,7 @@ static void makeLogsFileIfDidntExist(const char* dir){
 //What for: So logs.txt is easier to read
 static void logProgramStart(void){
     logFile = fopen(logDir, "a");
-    //Log time of program starting.
+
     currentTime = time(NULL);
     fprintf(logFile, "PROGRAM STARTED --- %s",asctime(localtime(&currentTime)));
     fclose(logFile);
@@ -47,8 +48,7 @@ static void logProgramStart(void){
 //What: Creates the directory and file where messages are logged and logs the time the program has started
 void initializeLogger(const char* dir, const char* file){
     if(sprintf(logDir, "%s/%s", dir, file) >= 32){
-        printf("initializeLogger: logDir exceeds 32 characters (logger.c)");
-        exit(1);//todo: better exit
+        closeProgramByError("initializeLogger: logDir exceeds 32 characters (logger.c)");
     }
 
     makeLogsFileIfDidntExist(dir);
@@ -84,6 +84,14 @@ static void logMessageFromBuffer(void){
     fclose(logFile);
 }
 
+//What for: When the program gets closed, the logger logs all messages and then is stuck on the messageBuffEmpty semaphore,
+//so we sem_post it and have to immediately exit through this method so we don't log garbage or make any other thread stuck on their messageBuffFull semaphore.
+static void exitIfNotActive(void){
+    if(loggerActive == 0){
+        thrd_exit(0);
+    }
+}
+
 //What: Calls logMessageFromBuffer() every (args) microseconds and uses mutexes and semaphores to know when it can log the message
 int loggerLoop(void* args){
     unsigned int delay = *(unsigned int *)args;
@@ -91,6 +99,8 @@ int loggerLoop(void* args){
 
         usleep(delay);
         sem_wait(&messageBuffEmpty);//Wait until buffer is not empty (until it gets at least one message)
+        exitIfNotActive();
+        
         mtx_lock(&messageMutex);//Lock messageBuffer for logMessage()
 
         //Update watchdog after sem_wait so it gets updated right away, making it so that watchdog doesn't terminate the program for not responding because it was waiting for a messsage.

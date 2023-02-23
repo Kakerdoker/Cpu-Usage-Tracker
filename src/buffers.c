@@ -83,18 +83,18 @@ void destroyMutexes(void){
 }
 
 void allocateBufferMemory(void){
-    currentCpuInfoBuffer = malloc(sizeof(struct CpuInfo)*cpuCoreAmount);
-    previousCpuInfoBuffer = malloc(sizeof(struct CpuInfo)*cpuCoreAmount);
+    currentCpuInfoBuffer = calloc(cpuCoreAmount, sizeof(struct CpuInfo));
+    previousCpuInfoBuffer = calloc(cpuCoreAmount, sizeof(struct CpuInfo));
     for(unsigned int core = 0; core < cpuCoreAmount; core++){
         //Fill both buffers with 0's to prevent junk data being read by the analyzer.
         currentCpuInfoBuffer[core] = previousCpuInfoBuffer[core] = (struct CpuInfo){0,0,0,0,0,0,0,0};
     }
     
-    cpuUsageBuffer = malloc(sizeof(double)*cpuCoreAmount);
+    cpuUsageBuffer = calloc(cpuCoreAmount, sizeof(double));
     
-    messageBuffer = malloc(sizeof(char*)*16);
+    messageBuffer = calloc(16, sizeof(char*));
     for(int i = 0; i < 16; i++){
-        messageBuffer[i] = malloc(sizeof(char)*256);
+        messageBuffer[i] = calloc(256, sizeof(char));
     }
 }
 

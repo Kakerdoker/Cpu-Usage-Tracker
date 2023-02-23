@@ -10,7 +10,7 @@ extern int loggerActive;
 void createThreads(void);
 
 //Joins every thread being used by the program
-void runThreads(void);
+void joinThreads(void);
 
 //Detaches every thread except logger
 void detachThreadsExceptLogger(void);
