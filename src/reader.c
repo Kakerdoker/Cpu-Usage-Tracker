@@ -34,15 +34,16 @@ void copyCpuInfoBuffer(void){
     }
 }
 
-//What: Reads only the important values from the currently opened file
+//What: Reads only the important values from the currently opened stat file
 //What for: So they can be used to calculate cpu usage
 void readStatFileAndPutIntoBuffer(void){
     unsigned int line = 0;
 
-    //Skip first line
+    //Skip first line (we don't need it)
     fscanf(statFile, "%*s %*i %*i %*i %*i %*i %*i %*i %*i %*i %*i");
 
-    //Go through all 10 numbers seperated by space ignoring the first cpu string and last guest & guest_nice variables. Do it for every cpu core and add it to the corresponding index in cpuInfo.
+    //Go through all 10 numbers ignoring the first cpu string and last guest & guest_nice variables.
+    //Do it for every cpu core and add it to the corresponding index in cpuInfo.
     while(line < cpuCoreAmount){
         fscanf(
             statFile,

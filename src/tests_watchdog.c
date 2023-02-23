@@ -7,6 +7,7 @@
 #include "../inc/tests_basic.h"
 
 //Test to see if watchdog still checks for responsiveness even if semEmpty == 0, which means that logger is waiting for new messages to log.
+//(watchdog shouldn't count logger as unresponsive if it's waiting for new messages)
 static void TEST_loggerBlockForUnresponsivness(void){
     updateBuffer[THREAD_AMOUNT-1] = time(NULL) - 3;
     myAssert(checkLoggerThread() == -1, "Logger was waiting for message but watchdog still checked to see if it was responsive. Did you sem_post(&messageBuffEmpty) anywhere in the test without sem_wait afterwards?");
@@ -46,7 +47,6 @@ static void TEST_threadMessages(void){
 }
 
 void TEST_watchdogMethods(void){
-    //If logger is waiting for messages then watchdog shouldn't count logger as unresponsive.
     TEST_loggerBlockForUnresponsivness();
     TEST_twoSecondsResponse();
     TEST_threeSecondsResponse();

@@ -49,7 +49,7 @@ static int checkThreadsWithoutLogger(void){
 //What: Checks if logger is being responsive, but only if it has anything in it's buffer
 //What for: So the logger won't be seen as unresponsive if it is waiting for messages
 int checkLoggerThread(void){
-    //Check if message buffer is not empty, if it is empty, that means the logger can't update it's response, so don't check for it.
+    //Check if message buffer is not empty, if it is empty, that means that logger can't update it's response, so don't check for it.
     sem_getvalue(&messageBuffEmpty, &messageBuffEmptyValue);
     if(messageBuffEmptyValue > 0){
         if(checkResponseLongerThan2Seconds(THREAD_AMOUNT-1)){
@@ -72,7 +72,8 @@ int checkAllThreadResponses(void){
 }
 
 
-//What: Looks if the value is not -1, which mean that the argument is the number of a thread that's unresponsive
+//What: Checks if the value is not -1 and stops the program if it isn't
+//What for: Because if it isn't -1, that means one of the threads is not responding
 static void stopEverything(const int thread){
     if(thread != -1){
         mtx_unlock(&watchdogUpdateMutex);

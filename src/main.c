@@ -8,7 +8,7 @@
 #include "../inc/logger.h"
 
 //What: Calls every initializing function in the entire program
-//What for: So there won't be any acces errors when the program starts
+//What for: So there won't be any access errors when the program starts
 static void initialize(void){
     initializeSigaction();
     initializeGlobalVariables();

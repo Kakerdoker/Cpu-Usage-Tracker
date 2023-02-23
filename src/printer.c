@@ -10,7 +10,7 @@
 
 static char percentageBar[10];
 
-//What: Creates a bar that for every 10% usage inside the given core adds one # more up to a max of 9, it fill out the rest with - chars.
+//What: Creates a bar that for every 10% usage inside the given core adds one '#' more up to a max of 9, it fills out the rest with '-' chars.
 //What for: So the user can have some visual representation of the core's usage
 char* makePercentageBar(const unsigned int core){
     int simplifiedPercent = (int)cpuUsageBuffer[core]/10;
@@ -38,10 +38,10 @@ int printCpuUsagePercantages(void* args){
         updateWatchdogBuffer(2);
 
         usleep(delay);
-        system("clear");
 
         mtx_lock(&cpuUsageMutex); //Lock cpu usage buffer for analyzerLoop()
 
+        system("clear");
         printCpuUsageAverages();
 
         mtx_unlock(&cpuUsageMutex);

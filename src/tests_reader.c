@@ -20,7 +20,7 @@ static void readFromStatFileWithSetContent(const char* content){
     readStatFileAndPutIntoBuffer();
 }
 
-//Test if variables were corretly read and put into the buffer.
+//Test if variables were correctly read and put into the buffer.
 static void TEST_VariablesReadFromFile(const long unsigned int number){
     for(unsigned int core = 0; core < cpuCoreAmount; core++){
         myAssert(currentCpuInfoBuffer[core].user == number, "User cpu usage wasn't read properly");

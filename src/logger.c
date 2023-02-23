@@ -35,7 +35,7 @@ static void makeLogsFileIfDidntExist(const char* dir){
 }
 
 //What: Logs the time the program has started
-//What for: So logs.txt is easier to read
+//What for: So logs.txt is easier to understand
 static void logProgramStart(void){
     logFile = fopen(logDir, "a");
 
@@ -56,7 +56,7 @@ void initializeLogger(const char* dir, const char* file){
 }
 
 //What: Logs the time the program has closed
-//What for: So logs.txt is easier to read / to know if the program completed execution until the end
+//What for: So logs.txt is easier to understand and to know if the program completed execution until the end
 void logClose(void){
     logFile = fopen(logDir, "a");
 
@@ -73,8 +73,8 @@ static void logMessageFromBuffer(void){
     strcpy(msg, readMessage());
 
     //Don't log the message if the first char is garbage
-    //(Spamming SIGINT would make logger print char -32 for some reason, this is a roundabout way of fixing that issue)
-    if((int)msg[0] < 0)
+    //(Spamming SIGINT would make logger print empty value for some reason, this is a roundabout way of fixing that issue)
+    if((int)msg[0] <= 0)
         return;
 
     currentTime = time(NULL);

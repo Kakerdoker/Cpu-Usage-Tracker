@@ -23,7 +23,7 @@ void cleanUp(void){
     destroySemaphores();
 }
 
-//Works like an assert but cleans up everything and prints a specified message before exiting
+//Works like an assert but cleans up everything and prints the specified message before exiting
 void myAssert(const int statement, const char* message){
     if(statement != 1){
         cleanUp();

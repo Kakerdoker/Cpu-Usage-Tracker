@@ -1,9 +1,9 @@
 #ifndef THREADS_H
 #define THREADS_H
 
-//1 if all threads (except logger) are supposed to be looping, 0 if they are not
+//Has valuse 1 if all threads (except logger) are supposed to be looping, 0 if they are not
 extern int threadsActive;
-//1 if logger is supposed to be looping, 0 if not
+//Has value 1 if logger thread is supposed to be looping, 0 if not
 extern int loggerActive;
 
 //Creates every thread used by the program
@@ -15,7 +15,7 @@ void joinThreads(void);
 //Detaches every thread except logger
 void detachThreadsExceptLogger(void);
 
-//Detaches every thread except logget and watchdog
+//Detaches every thread except logger and watchdog
 void detachThreadsExceptLogAndWatch(void);
 
 //Detaches the logger thread

@@ -14,8 +14,6 @@ static void TEST_CalculatingCpuUsage(void){
 }
 
 void TEST_analyzerMethods(void){
-    //Calculate the usage
     addCpuUsageToBuffer();
-    //Check if it's equal to 66.6% on all cores.
     TEST_CalculatingCpuUsage();
 }

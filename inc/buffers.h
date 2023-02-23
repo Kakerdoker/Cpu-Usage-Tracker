@@ -31,10 +31,10 @@ extern double* cpuUsageBuffer;
 //Buffer holding information of the last time every thread updated it's activity (excluding watchdog)
 extern time_t updateBuffer[THREAD_AMOUNT];
 
-//Reads message from a circular buffer
+//Reads message from a circular buffer that stores log messages
 char* readMessage(void);
 
-//Writes messages to a circular buffer
+//Writes messages to a circular buffer that stores log messages
 void writeMessage(const char*);
 
 //Updates the watchdog buffer with the current time

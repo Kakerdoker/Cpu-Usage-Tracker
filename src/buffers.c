@@ -46,7 +46,7 @@ time_t updateBuffer[THREAD_AMOUNT];
 //What for: So the latest update can be read by the watchdog
 void updateWatchdogBuffer(const int threadIndex){
 
-    mtx_lock(&watchdogUpdateMutex);//Lock the watchdog mutex so checkLastUpdate() doesn't check for updates while changing them.
+    mtx_lock(&watchdogUpdateMutex);//Lock the watchdog mutex so checkLastUpdate() doesn't check for updates at the same time.
 
     if(threadIndex < 4 && threadIndex >= 0){
         updateBuffer[threadIndex] = time(NULL);
@@ -85,11 +85,6 @@ void destroyMutexes(void){
 void allocateBufferMemory(void){
     currentCpuInfoBuffer = calloc(cpuCoreAmount, sizeof(struct CpuInfo));
     previousCpuInfoBuffer = calloc(cpuCoreAmount, sizeof(struct CpuInfo));
-    for(unsigned int core = 0; core < cpuCoreAmount; core++){
-        //Fill both buffers with 0's to prevent junk data being read by the analyzer.
-        currentCpuInfoBuffer[core] = previousCpuInfoBuffer[core] = (struct CpuInfo){0,0,0,0,0,0,0,0};
-    }
-    
     cpuUsageBuffer = calloc(cpuCoreAmount, sizeof(double));
     
     messageBuffer = calloc(16, sizeof(char*));

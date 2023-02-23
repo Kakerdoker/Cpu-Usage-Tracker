@@ -13,12 +13,12 @@
 static char logF[20] = "testLogs/logs.txt";
 
 static void TEST_initializeLogger(void){
-    //Delete files
     remove("testLogs/logs.txt");
     rmdir("testLogs");
 
-    initializeLogger("testLogs","logs.txt");//Create again the just deleted files
-    myAssert(access(logF, F_OK) == 0, "initializeLogger() hasn't sucesfully created the logs.txt file");//Check if they exist
+    //Create again the just deleted files
+    initializeLogger("testLogs","logs.txt");
+    myAssert(access(logF, F_OK) == 0, "initializeLogger() hasn't sucesfully created the logs.txt file");
 
     //Read first 2 strings of the newly created file and put them inside testedString
     FILE *loggerFile = fopen(logF, "r");
@@ -63,7 +63,7 @@ static void TEST_readMessagesFromLogger(void){
 
     FILE *loggerFile = fopen(logF, "r");
 
-    //Skip first line (program started message)
+    //Skip first line (the program started message)
     fscanf(loggerFile, "%*s %*s %*s %*s %*s %*s %*s %*s");
 
     //Go through all the spammed messages
@@ -86,9 +86,14 @@ static void TEST_readMessagesFromLogger(void){
 //Asynchronously ask 40 messages to be logged while also logging these messages at the same time
 static void TEST_overflowingMessageBuffer(void){
     
-    unsigned int delay = 1000;//Make the logger wait only 1000 microseconds between logging messages, if this value changes then the sleep(1) inside putMessagesIntoLogger() needs to be adjusted properly
-    thrd_create(&tester, putMessagesIntoLogger, NULL);//Function to ask for the messages to be logged
-    thrd_create(&logger, loggerLoop, &delay);//Function from logger.c to be tested
+    //Make the logger wait only 1000 microseconds between logging messages,
+    //if this value changes then the sleep(1) inside putMessagesIntoLogger() needs to be adjusted properly
+    unsigned int delay = 1000;
+
+    //ask the messages to be logged
+    thrd_create(&tester, putMessagesIntoLogger, NULL);
+    //log them
+    thrd_create(&logger, loggerLoop, &delay);
    
     thrd_join(tester, NULL);
     thrd_join(logger, NULL);
