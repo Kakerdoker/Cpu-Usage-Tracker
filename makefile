@@ -17,6 +17,7 @@ output: $(OBJECTS) obj/main.o
 
 test: $(OBJECTS) $(TESTSOBJECTS)  obj/tests_main.o
 	$(CC) $(OBJECTS) $(TESTSOBJECTS) $(WALL) obj/tests_main.o -o test
+	mkdir -p testFile
 
 obj/%.o: src/%.c | obj
 	$(CC) $(CFLAGS) $(WALL) -o $@ $<
@@ -26,5 +27,5 @@ obj:
 
 clean:
 	clear
-	rm -rf logs testLogs obj
+	rm -rf logs testLogs obj testFile
 	rm output test

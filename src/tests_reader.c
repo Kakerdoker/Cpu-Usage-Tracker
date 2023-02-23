@@ -11,12 +11,12 @@
 
 static void readFromStatFileWithSetContent(const char* content){
     //Fill out statFile with an example proc/stat file taken as the content argument.
-    FILE *statFile = fopen("tests/statTest", "w");
+    FILE *statFile = fopen("testFile/statTest", "w");
     fprintf(statFile, "%s", content);
     fclose(statFile);
 
     //Open it inside reader.c and read it.
-    openStatFile("tests/statTest");
+    openStatFile("testFile/statTest");
     readStatFileAndPutIntoBuffer();
 }
 
